@@ -122,8 +122,8 @@ const handleJoin = async () => {
 const handleFileChange = (event) => {
   const file = event.target.files[0];
   if (file) {
-    if (file.size > 2 * 1024 * 1024) {
-      toast.add({ severity: "warn", summary: "File Terlalu Besar", detail: "Maksimal 2MB", life: 3000 });
+    if (file.size > 5 * 1024 * 1024) {
+      toast.add({ severity: "warn", summary: "File Terlalu Besar", detail: "Maksimal 5MB", life: 3000 });
       return;
     }
     selectedFile.value = file;
@@ -309,7 +309,7 @@ onUnmounted(() => {
                 <label for="forum-media-input" class="cursor-pointer flex flex-col items-center gap-1 text-gray-500 hover:text-blue-600 transition">
                   <i class="fa-solid fa-cloud-arrow-up text-2xl"></i>
                   <span class="text-sm font-medium">Klik untuk upload gambar</span>
-                  <span class="text-xs text-gray-400">JPG, PNG (Max 2MB)</span>
+                  <span class="text-xs text-gray-400">JPG, PNG (Max 5MB)</span>
                 </label>
                 <input id="forum-media-input" type="file" accept="image/*" class="hidden" @change="handleFileChange" />
               </div>
