@@ -6,3 +6,7 @@
 @theme {
   --font-poppins: "Poppins", sans-serif;
 }
+
+.p-toast {
+  @apply w-[calc(100vw-80px)] sm:w-[calc(100vw-90px)] md:w-[25rem];
+}
