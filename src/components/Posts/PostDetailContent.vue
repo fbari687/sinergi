@@ -1,0 +1,241 @@
+<script setup>
+import { useAuthStore } from "@/store/auth";
+import commentApi from "@/services/commentApi";
+import { onMounted, provide, ref, watch } from "vue";
+import { Button, useToast } from "primevue";
+import CommentTile from "@/components/Comments/CommentTile.vue";
+import CommentTileSkeleton from "@/components/Comments/CommentTileSkeleton.vue";
+import { formatTimeAgo } from "@/utils/formatDate";
+import NumberFlow from "@number-flow/vue";
+import PostOptionsPopover from "./PostOptionsPopover.vue";
+import Image from "primevue/image";
+import { RouterLink } from "vue-router";
+
+const authStore = useAuthStore();
+const toast = useToast();
+
+const props = defineProps({
+  post: {
+    type: Object,
+    required: true,
+  },
+});
+
+const emit = defineEmits(["changeCommentCount", "toggleLike", "handleDelete"]);
+
+const comments = ref([]);
+const loadingLoadComment = ref(true);
+const loadingSendComment = ref(false);
+const commentMessage = ref("");
+const inputRef = ref(null);
+const replyingTo = ref(null);
+
+const refreshSignal = ref(null);
+provide("refreshSignal", refreshSignal);
+
+// STATE UTAMA: Gunakan jumlah dari props sebagai nilai awal yang benar
+const currentCommentCount = ref(props.post.comment_count || 0);
+
+// --- FUNGSI LOGIKA KOMENTAR ---
+
+const loadComments = async () => {
+  if (comments.value.length === 0) loadingLoadComment.value = true;
+
+  try {
+    const response = await commentApi.getCommentsByPostId(props.post.id);
+    comments.value = response.data.data;
+
+    // [HAPUS BAGIAN INI]
+    // Jangan hitung ulang di sini, karena reply_count backend tidak rekursif sampai cucu.
+    // Biarkan currentCommentCount tetap memakai nilai dari PostCard/Props.
+  } catch (error) {
+    console.error("Gagal memuat komentar: ", error);
+  } finally {
+    loadingLoadComment.value = false;
+  }
+};
+
+const handleDeleteComment = async (commentId) => {
+  try {
+    await commentApi.deleteComment(commentId);
+
+    // Update UI List
+    await loadComments();
+
+    // Update Count Manual (Kurangi 1)
+    currentCommentCount.value = Math.max(0, currentCommentCount.value - 1);
+    emit("changeCommentCount", props.post.id, currentCommentCount.value);
+
+    toast.add({ severity: "success", summary: "Berhasil", detail: "Komentar dihapus", life: 3000 });
+  } catch (err) {
+    console.error("Gagal menghapus comment: ", err);
+    toast.add({ severity: "error", summary: "Gagal", detail: "Gagal menghapus komentar", life: 3000 });
+  }
+};
+
+const handleSetReply = ({ comment, username }) => {
+  replyingTo.value = {
+    id: comment.id,
+    username: username,
+  };
+  if (inputRef.value) inputRef.value.focus();
+};
+
+const cancelReply = () => {
+  replyingTo.value = null;
+  commentMessage.value = "";
+};
+
+const handleSubmitComment = async () => {
+  if (!commentMessage.value.trim()) return;
+  loadingSendComment.value = true;
+
+  try {
+    const formData = new FormData();
+    formData.append("content", commentMessage.value);
+
+    const targetReplyId = replyingTo.value ? replyingTo.value.id : null;
+
+    if (replyingTo.value) {
+      await commentApi.replyComment(formData, replyingTo.value.id);
+      toast.add({ severity: "success", summary: "Terkirim", detail: "Balasan berhasil dikirim", life: 3000 });
+
+      refreshSignal.value = {
+        commentId: targetReplyId,
+        timestamp: Date.now(),
+      };
+    } else {
+      await commentApi.createComment(formData, props.post.id);
+      toast.add({ severity: "success", summary: "Terkirim", detail: "Komentar berhasil dikirim", life: 3000 });
+    }
+
+    // Update Count Manual (Tambah 1)
+    currentCommentCount.value++;
+    emit("changeCommentCount", props.post.id, currentCommentCount.value);
+
+    // Reset Form & Reload List
+    commentMessage.value = "";
+    replyingTo.value = null;
+    await loadComments();
+  } catch (err) {
+    console.error("Gagal komentar: ", err);
+    toast.add({ severity: "error", summary: "Gagal", detail: "Gagal mengirim komentar", life: 3000 });
+  } finally {
+    loadingSendComment.value = false;
+  }
+};
+
+const handleLike = () => {
+  emit("toggleLike", props.post.id);
+};
+
+const deletePost = () => {
+  emit("handleDelete", props.post.id);
+};
+
+// Watcher: Jika props di luar berubah (misal real-time update), sinkronkan
+watch(
+  () => props.post.comment_count,
+  (newVal) => {
+    // Hanya update jika perbedaannya signifikan (untuk menghindari overwrite update lokal kita)
+    if (newVal !== currentCommentCount.value) {
+      currentCommentCount.value = newVal;
+    }
+  }
+);
+
+onMounted(loadComments);
+</script>
+
+<template>
+  <div class="flex flex-col h-full bg-white relative">
+    <div class="flex-1 p-4 space-y-6 overflow-y-auto pb-24">
+      <div>
+        <div class="flex items-start">
+          <img :src="post.user.profile_picture" alt="Profile" class="w-12 h-12 rounded-full mr-3 object-cover" />
+          <div class="grow">
+            <RouterLink to="#" class="text-base font-bold border-b border-b-transparent transition duration-150 hover:border-b-black">
+              {{ post.user.username }} <span class="text-sm font-normal text-gray-600">({{ post.user.id == authStore.user.id ? "Anda" : post.user.role }})</span>
+            </RouterLink>
+            <p class="text-xs text-gray-500 mt-1">{{ formatTimeAgo(post.created_at) }}</p>
+          </div>
+          <PostOptionsPopover :post="post" @deletePost="deletePost" />
+        </div>
+
+        <div class="pt-2 text-sm leading-relaxed">
+          <p class="w-full" v-html="post.description"></p>
+          <template v-if="post.media_url != null">
+            <div class="w-full mt-3 rounded-lg overflow-hidden border border-gray-200 flex items-center justify-center h-[586px] max-h-[586px] bg-gray-200 group-[.no-image]:hidden">
+              <Image :src="post.media_url" alt="Gambar Postingan" preview imageClass="h-full max-h-full w-auto object-contain" />
+            </div>
+          </template>
+        </div>
+
+        <div class="flex justify-around px-4 py-2 border-t border-b mt-4">
+          <button @click="handleLike" type="button" class="w-20 bg-transparent border-none cursor-pointer text-sm text-gray-600 flex gap-2 items-center justify-center group">
+            <i :class="post.is_liked_by_user ? 'fa-solid fa-heart text-lg text-pink-600' : 'fa-regular fa-heart text-lg text-gray-600'"></i>
+            <span class="w-10 text-start"><NumberFlow :value="post.like_count" /></span>
+          </button>
+
+          <button type="button" class="w-20 bg-transparent border-none cursor-pointer text-sm text-gray-600 flex gap-2 items-center justify-center">
+            <i class="fa-regular fa-comment text-lg p-2"></i>
+            <span class="w-10 text-start"><NumberFlow :value="currentCommentCount" /></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <h5 class="text-base font-semibold text-gray-800">Komentar</h5>
+
+        <template v-if="loadingLoadComment">
+          <CommentTileSkeleton v-for="n in 3" :key="n" />
+        </template>
+        <template v-else>
+          <template v-if="comments.length === 0">
+            <p class="text-gray-500 text-sm italic">Belum ada komentar.</p>
+          </template>
+          <template v-else>
+            <CommentTile v-for="comment in comments" :key="comment.id" :comment="comment" @deleteComment="handleDeleteComment" @setReply="handleSetReply" />
+          </template>
+        </template>
+      </div>
+    </div>
+
+    <div class="fixed left-0 w-full bottom-0 z-20 flex items-center justify-center">
+      <div class="block w-full lg:max-w-[690px] bg-white border-t">
+        <div v-if="replyingTo" class="px-4 py-2 bg-gray-100 flex justify-between items-center text-sm border-b">
+          <span class="text-gray-600">
+            Membalas <span class="font-bold text-blue-600">@{{ replyingTo.username }}</span>
+          </span>
+          <button @click="cancelReply" class="text-gray-500 hover:text-red-500 font-bold">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="p-4 bg-gray-50">
+          <form @submit.prevent="handleSubmitComment" class="flex items-center justify-between gap-3">
+            <img :src="authStore.user.profile_picture" alt="My Profile" class="w-10 h-10 rounded-full object-cover" />
+            <input
+              ref="inputRef"
+              type="text"
+              name="content"
+              v-model="commentMessage"
+              :disabled="loadingSendComment"
+              :placeholder="replyingTo ? `Balas @${replyingTo.username}...` : 'Tulis komentar...'"
+              class="flex-1 border border-gray-300 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-200 disabled:cursor-not-allowed transition-all"
+            />
+            <Button
+              type="submit"
+              :label="replyingTo ? 'Balas' : 'Kirim'"
+              class="bg-blue-600! hover:bg-blue-700! text-white border-none rounded-full px-5 py-2 text-sm font-semibold cursor-pointer transition-colors duration-300"
+              :loading="loadingSendComment"
+              :disabled="!commentMessage.trim() || loadingSendComment"
+            />
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped></style>

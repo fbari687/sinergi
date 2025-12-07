@@ -1,0 +1,34 @@
+{
+  "name": "sinergi",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@number-flow/vue": "^0.4.8",
+    "@primeuix/themes": "^1.2.5",
+    "@tailwindcss/language-server": "^0.14.29",
+    "@tailwindcss/vite": "^4.1.16",
+    "axios": "^1.13.1",
+    "chart.js": "^4.5.1",
+    "date-fns": "^4.1.0",
+    "lodash": "^4.17.21",
+    "nprogress": "^0.2.0",
+    "pinia": "^3.0.3",
+    "primeicons": "^7.0.0",
+    "primevue": "^4.4.1",
+    "quill": "^2.0.3",
+    "tailwindcss-primeui": "^0.6.1",
+    "vue": "^3.5.22",
+    "vue-router": "^4.6.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.19",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "vite": "^7.1.7"
+  }
+}

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/logo_sinergi_white_bg.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <title>Sinergi</title>
+    <style>
+      #preloader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: #ffffff; /* Latar belakang preloader */
+        z-index: 9999;
+
+        /* Pusatkan konten */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+
+        /* Transisi saat menghilang (opsional tapi keren) */
+        transition: opacity 0.5s ease;
+      }
+
+      #preloader img {
+        width: 150px; /* Sesuaikan ukuran logo Anda */
+      }
+
+      /* Ini adalah CSS untuk loading bar sederhana
+        (Gaya "indeterminate" atau tidak pasti)
+      */
+      .loading-bar-container {
+        width: 250px;
+        height: 8px;
+        background-color: #e0e0e0; /* Warna dasar bar */
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      .loading-bar-progress {
+        width: 100%;
+        height: 100%;
+        background-color: #007bff; /* Warna brand Anda */
+        animation: indeterminate-progress 2s infinite ease-in-out;
+      }
+
+      @keyframes indeterminate-progress {
+        0% {
+          transform: translateX(-100%);
+        }
+        50% {
+          transform: translateX(0);
+        }
+        100% {
+          transform: translateX(100%);
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 font-poppins">
+    <div id="app">
+      <div id="preloader">
+        <img src="/logo_sinergi.png" alt="Sinergi Logo" />
+        <div class="loading-bar-container">
+          <div class="loading-bar-progress"></div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
