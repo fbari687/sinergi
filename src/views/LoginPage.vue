@@ -20,10 +20,10 @@ const showPassword = ref(false);
 const showProfileDialog = ref(false);
 
 const captchaUrl = ref("");
-const API_BASE_URL = "https://sinergi-api.test";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const refreshCaptcha = () => {
-  captchaUrl.value = `${API_BASE_URL}/api/captcha?_t=${Date.now()}`;
+  captchaUrl.value = `${API_BASE_URL}/captcha?_t=${Date.now()}`;
 };
 
 onMounted(refreshCaptcha);
