@@ -147,7 +147,7 @@ export const useAuthStore = defineStore("auth", () => {
       // Logout sukses, MATIKAN polling
       stopNotificationPolling();
 
-      router.push("/login");
+      router.push("/");
     }
   }
 

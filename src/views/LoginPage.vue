@@ -111,7 +111,7 @@ const onProfileCompleted = () => {
 
               <div class="flex items-center gap-2">
                 <div class="w-full bg-gray-200 rounded-md p-2 text-center border border-gray-300">
-                  <img :src="captchaUrl" alt="captcha" class="h-[50px] w-full border rounded" />
+                  <img :src="captchaUrl" alt="captcha" crossorigin="use-credentials" class="h-[50px] w-full border rounded" />
                 </div>
                 <button type="button" @click="refreshCaptcha" class="shrink-0 bg-gray-600 hover:bg-gray-700 text-white border-none h-10 w-10 rounded-lg text-sm font-semibold cursor-pointer transition-colors duration-300">
                   <i class="fas fa-redo"></i>
