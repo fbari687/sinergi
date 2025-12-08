@@ -222,12 +222,12 @@ onMounted(loadComments);
               v-model="commentMessage"
               :disabled="loadingSendComment"
               :placeholder="replyingTo ? `Balas @${replyingTo.username}...` : 'Tulis komentar...'"
-              class="flex-1 border border-gray-300 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-200 disabled:cursor-not-allowed transition-all"
+              class="flex-1 border border-gray-300 rounded-full pl-4 pr-2 py-2.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-200 disabled:cursor-not-allowed transition-all"
             />
             <Button
               type="submit"
-              :label="replyingTo ? 'Balas' : 'Kirim'"
-              class="bg-blue-600! hover:bg-blue-700! text-white border-none rounded-full px-5 py-2 text-sm font-semibold cursor-pointer transition-colors duration-300"
+              icon="pi pi-send"
+              class="w-[38px]! min-w-[38px]! bg-blue-600! hover:bg-blue-700! text-white! border-none rounded-full! px-2.5! text-sm font-semibold cursor-pointer! transition-colors duration-300"
               :loading="loadingSendComment"
               :disabled="!commentMessage.trim() || loadingSendComment"
             />
