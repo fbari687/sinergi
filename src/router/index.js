@@ -9,7 +9,6 @@ import YourCommunityPage from "@/views/YourCommunityPage.vue";
 import CommunityPostsPage from "@/views/CommunityPostsPage.vue";
 import CommunitiesPage from "@/views/CommunitiesPage.vue";
 import ForbiddenPage from "@/views/ForbiddenPage.vue";
-import CommunitiesFeedsPage from "@/views/CommunitiesFeedsPage.vue";
 import CommunityMembersPage from "@/views/CommunityMembersPage.vue";
 import CommunityForumsPage from "@/views/CommunityForumsPage.vue";
 import CommunityWrapper from "@/views/CommunityWrapper.vue";
@@ -87,21 +86,13 @@ const routes = [
     name: "Communities",
     component: CommunitiesPage,
     meta: {
-      roles: allRoles,
+      roles: internalRoles,
     },
   },
   {
     path: "/communities/joined",
     name: "YourCommunities",
     component: YourCommunityPage,
-    meta: {
-      roles: allRoles,
-    },
-  },
-  {
-    path: "/communities/feeds",
-    name: "CommunitiesFeed",
-    component: CommunitiesFeedsPage,
     meta: {
       roles: allRoles,
     },
@@ -154,7 +145,7 @@ const routes = [
     name: "AdminDashboard",
     component: DashboardPage,
     meta: {
-      roles: allRoles,
+      roles: ["Admin"],
     },
   },
   {
@@ -218,6 +209,7 @@ router.beforeEach(async (to, from, next) => {
     if (userRole === "Admin") {
       return next({ name: "AdminDashboard" });
     }
+
     // Jika User biasa, redirect ke HomePage
     return next({ name: "HomePage" });
   }
@@ -225,6 +217,13 @@ router.beforeEach(async (to, from, next) => {
   // 2. Jika Admin mencoba akses HomePage (/), redirect ke AdminDashboard
   if (to.name === "HomePage" && isLoggedIn && userRole === "Admin") {
     return next({ name: "AdminDashboard" });
+  }
+
+  if (to.name === "HomePage" && isLoggedIn && externalRoles.includes(userRole)) {
+    return next({ name: "YourCommunities" });
+  }
+  if (to.name === "Communities" && isLoggedIn && externalRoles.includes(userRole)) {
+    return next({ name: "YourCommunities" });
   }
 
   // 3. Cek Permission Role

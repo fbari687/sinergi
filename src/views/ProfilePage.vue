@@ -122,8 +122,8 @@ const openEditDialog = () => {
 const handleFileChange = (event) => {
   const file = event.target.files[0];
   if (file) {
-    if (file.size > 2 * 1024 * 1024) {
-      toast.add({ severity: "warn", summary: "File Terlalu Besar", detail: "Maksimal 2MB", life: 3000 });
+    if (file.size > 5 * 1024 * 1024) {
+      toast.add({ severity: "warn", summary: "File Terlalu Besar", detail: "Maksimal 5MB", life: 3000 });
       return;
     }
     selectedFile.value = file;

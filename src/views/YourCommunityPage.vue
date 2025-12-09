@@ -6,11 +6,13 @@ import communityApi from "@/services/communityApi";
 import { ref, onMounted, watch, computed } from "vue";
 import { useCommunityStore } from "@/store/community";
 import CreateCommunity from "@/components/Communities/CreateCommunity.vue";
+import { useAuthStore } from "@/store/auth";
 
 const communities = ref([]); // Data mentah dari API
 const loading = ref(true);
 const searchQuery = ref("");
 const communityStore = useCommunityStore();
+const authStore = useAuthStore();
 
 const loadCommunities = async () => {
   loading.value = true;
@@ -43,6 +45,10 @@ const joinedCommunities = computed(() => {
   return filteredCommunities.value.filter((c) => c.current_user_role !== "OWNER");
 });
 
+const isInternal = computed(() => {
+  return authStore.user.role === "Admin" || authStore.user.role === "Mahasiswa" || authStore.user.role === "Dosen";
+});
+
 onMounted(loadCommunities);
 
 watch(
@@ -61,9 +67,9 @@ watch(
           <div class="w-full flex items-end justify-between text-sm md:text-base font-medium border-b border-gray-200 pb-4">
             <div class="w-full">
               <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Komunitas Saya</h1>
-              <p class="text-sm text-gray-500">Kelola komunitas yang Anda buat dan ikuti.</p>
+              <p class="text-sm text-gray-500">Kelola komunitas yang Anda <span v-if="isInternal">buat dan</span> ikuti.</p>
               <div class="w-full block lg:hidden mt-2">
-                <CreateCommunity />
+                <CreateCommunity v-if="isInternal" />
               </div>
             </div>
           </div>
@@ -86,7 +92,7 @@ watch(
         </div>
 
         <template v-else>
-          <div class="w-full flex flex-col gap-4">
+          <div v-if="isInternal" class="w-full flex flex-col gap-4">
             <div class="flex items-center gap-2">
               <i class="fa-solid fa-crown text-yellow-500"></i>
               <h2 class="text-lg font-bold text-gray-800">Dikelola oleh Anda ({{ myOwnCommunities.length }})</h2>
@@ -102,7 +108,7 @@ watch(
             </div>
           </div>
 
-          <hr class="w-full border-gray-200" />
+          <hr v-if="isInternal" class="w-full border-gray-200" />
 
           <div class="w-full flex flex-col gap-4">
             <div class="flex items-center gap-2">

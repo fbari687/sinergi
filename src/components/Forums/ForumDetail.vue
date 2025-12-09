@@ -10,10 +10,12 @@ import { formatDistanceToNow } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import LayoutDefaultUser from "@/layouts/LayoutDefaultUser.vue";
 import Image from "primevue/image";
+import { useRouter } from "vue-router";
 
 // Props dari Router (URL Params)
 const props = defineProps(["slug", "forumId"]);
 
+const router = useRouter();
 const authStore = useAuthStore();
 const toast = useToast();
 
@@ -45,8 +47,16 @@ const loadData = async () => {
     answers.value = resAns.data.data;
     community.value = resComm.data.data;
   } catch (err) {
+    if (err.response) {
+      const status = err.response.status;
+      if (status === 403) {
+        router.replace({ name: "ForbiddenPage" });
+      } else if (status === 404) {
+        router.replace({ name: "HomePage" });
+      }
+    }
     console.error(err);
-    toast.add({ severity: "error", summary: "Error", detail: "Gagal memuat diskusi", life: 3000 });
+    // toast.add({ severity: "error", summary: "Error", detail: "Gagal memuat diskusi", life: 3000 });
   } finally {
     loading.value = false;
   }
@@ -200,7 +210,6 @@ onMounted(loadData);
                 <span class="font-bold block mb-1">Tips Bertanya:</span>
                 <ul class="list-disc pl-4 space-y-1 text-xs">
                   <li>Jelaskan masalah dengan detail.</li>
-                  <li>Sertakan pesan error atau kode.</li>
                   <li>Gunakan bahasa yang sopan.</li>
                 </ul>
               </div>

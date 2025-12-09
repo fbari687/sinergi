@@ -30,9 +30,14 @@ const loadCommunity = async () => {
   } catch (err) {
     console.error("Gagal memuat community", err);
 
-    // Jika gagal (misal 404), redirect ke list komunitas.
-    router.replace("/communities");
-
+    if (err.response) {
+      const status = err.response.status;
+      if (status === 403) {
+        router.replace({ name: "ForbiddenPage" });
+      } else if (status === 404) {
+        router.replace({ name: "Communities" });
+      }
+    }
     // PENTING: Biarkan loading tetap true agar template tidak error saat akses properti 'community' yang null
   }
 };
