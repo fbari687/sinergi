@@ -214,11 +214,6 @@ router.beforeEach(async (to, from, next) => {
     return next({ name: "HomePage" });
   }
 
-  // 2. Jika Admin mencoba akses HomePage (/), redirect ke AdminDashboard
-  if (to.name === "HomePage" && isLoggedIn && userRole === "Admin") {
-    return next({ name: "AdminDashboard" });
-  }
-
   if (to.name === "HomePage" && isLoggedIn && externalRoles.includes(userRole)) {
     return next({ name: "YourCommunities" });
   }

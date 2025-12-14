@@ -15,6 +15,7 @@ const loading = ref(true);
 
 const loadPost = async () => {
   loading.value = true;
+
   try {
     const response = await postApi.getPostById(postId);
     post.value = response.data.data;

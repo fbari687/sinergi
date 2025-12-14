@@ -119,7 +119,7 @@ const removeFile = () => {
 <template>
   <article class="w-full bg-white border border-gray-200 rounded-xl mb-5 group p-4 flex flex-col gap-2">
     <div class="w-full flex gap-2">
-      <img :src="authStore.user.profile_picture" class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover" alt="profile picture" />
+      <img :src="authStore.user.profile_picture" class="min-w-10 w-10 min-h-10 h-10 md:w-12 md:min-w-12 md:h-12 md:min-h-12 rounded-full object-cover" alt="profile picture" />
       <button @click="visible = true" type="button" class="cursor-text w-full border border-gray-300 bg-gray-200 rounded-full text-start px-4 hover:bg-gray-300 transition-colors">
         <span class="text-gray-500 text-sm md:text-base">Buat Postingan...</span>
       </button>

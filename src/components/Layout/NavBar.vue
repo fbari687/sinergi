@@ -1,11 +1,12 @@
 <script setup>
 import { Menubar, useConfirm } from "primevue";
-import { ref } from "vue";
-import { RouterLink, useRouter } from "vue-router";
+import { computed } from "vue"; // Ganti ref dengan computed
+import { RouterLink, useRouter, useRoute } from "vue-router"; // Tambah useRoute
 import { useAuthStore } from "@/store/auth";
 
 const authStore = useAuthStore();
 const router = useRouter();
+const route = useRoute(); // Hook untuk mengambil informasi URL saat ini
 const confirm = useConfirm();
 
 const handleLogoutConfirm = () => {
@@ -23,21 +24,42 @@ const handleLogoutConfirm = () => {
   });
 };
 
-const items = ref([
+// Ubah 'items' menjadi computed agar reaktif terhadap perubahan route
+const items = computed(() => [
   {
-    label: authStore.user.fullname,
+    label: authStore.user?.fullname || "User",
     items: [
       {
         label: "My Profile",
         icon: "fas fa-user-circle",
         command: () => {
-          router.push(`/profile/${authStore.user.username}`);
+          if (authStore.user) {
+            router.push(`/profile/${authStore.user.username}`);
+          }
         },
       },
-      // {
-      //   label: "Settings",
-      //   icon: "fas fa-cog",
-      // },
+      {
+        label: "Akses Dashboard",
+        icon: "fas fa-chart-line",
+        // Tampil jika: Role ADMIN DAN TIDAK sedang berada di halaman admin
+        visible: authStore.user?.role === "Admin" && !route.path.startsWith("/admin"),
+        command: () => {
+          if (authStore.user) {
+            router.push(`/admin/dashboard`);
+          }
+        },
+      },
+      {
+        label: "Akses Sinergi",
+        icon: "fas fa-home",
+        // Tampil jika: Role ADMIN DAN SEDANG berada di halaman admin
+        visible: authStore.user?.role === "Admin" && route.path.startsWith("/admin"),
+        command: () => {
+          if (authStore.user) {
+            router.push(`/home`);
+          }
+        },
+      },
       {
         separator: true,
       },
@@ -45,7 +67,9 @@ const items = ref([
         label: "Logout",
         icon: "fas fa-sign-out-alt",
         command: () => {
-          handleLogoutConfirm();
+          if (authStore.user) {
+            handleLogoutConfirm();
+          }
         },
       },
     ],
@@ -62,7 +86,7 @@ const items = ref([
     </template>
     <template #item="{ item, props, hasSubmenu, root }">
       <a v-if="root" v-ripple class="flex items-center" v-bind="props.action">
-        <img :src="authStore.user.profile_picture" class="block w-10 h-10 rounded-full cursor-pointer object-cover border-2 border-gray-200 mr-2" alt="Foto User" />
+        <img v-if="authStore.user" :src="authStore.user?.profile_picture" class="block w-10 h-10 rounded-full cursor-pointer object-cover border-2 border-gray-200 mr-2" alt="Foto User" />
         <span class="font-semibold">{{ item.label }}</span>
         <i v-if="hasSubmenu" class="pi pi-angle-down ml-2"></i>
       </a>
@@ -77,18 +101,18 @@ const items = ref([
 
 <style scoped>
 /* :deep() memaksa style ini masuk ke dalam 
-  komponen Menubar
+   komponen Menubar
 */
 
 /* Secara default (mobile), SEMBUNYIKAN 
-  seluruh daftar menu <ul>.
+   seluruh daftar menu <ul>.
 */
 :deep(.p-menubar-root-list) {
   display: none;
 }
 
 /* Pada breakpoint 'md' (768px) dan lebih besar,
-  TAMPILKAN kembali daftar menu <ul> sebagai flex.
+   TAMPILKAN kembali daftar menu <ul> sebagai flex.
 */
 @media (min-width: 1024px) {
   :deep(.p-menubar-root-list) {

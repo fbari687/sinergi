@@ -5,6 +5,7 @@ import { Popover, useConfirm } from "primevue";
 import { ref, computed, watch, inject } from "vue";
 import commentApi from "@/services/commentApi"; // Import API
 import { useReportModal } from "@/utils/useReportModal";
+import { RouterLink } from "vue-router";
 
 const { openReport } = useReportModal();
 
@@ -175,14 +176,16 @@ const loadMoreReplies = () => {
   <div class="flex flex-col">
     <!-- TAMPILAN UTAMA KOMENTAR -->
     <div class="flex items-start gap-3">
-      <img :src="comment.user.profile_picture" alt="User" class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover self-start mt-1" />
+      <RouterLink :to="`/profile/${comment.user.username}`">
+        <img :src="comment.user.profile_picture" alt="User" class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover self-start mt-1" />
+      </RouterLink>
 
       <div class="flex-1">
         <!-- Bubble Komentar -->
         <div class="bg-gray-100 rounded-2xl px-4 py-2 inline-block min-w-[200px]">
           <div class="flex justify-between items-baseline gap-4 mb-1">
-            <h6 class="text-sm font-bold text-gray-900">{{ comment.user.username }}</h6>
-            <span class="text-xs text-gray-500 hover:underline cursor-pointer">
+            <RouterLink :to="`/profile/${comment.user.username}`" class="text-sm font-bold text-gray-900 hover:underline cursor-pointer">{{ comment.user.username }}</RouterLink>
+            <span class="text-xs text-gray-500">
               {{ formatTimeAgo(comment.created_at) }}
             </span>
           </div>

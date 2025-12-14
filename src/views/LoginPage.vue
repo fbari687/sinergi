@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { useAuthStore } from "@/store/auth";
-import { useRouter } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 import { Button, Message } from "primevue";
 // Import Component Dialog (Pastikan path sesuai)
 import ProfileCompletionDialog from "@/components/Profiles/ProfileCompletionDialog.vue";
@@ -72,12 +72,28 @@ const onProfileCompleted = () => {
   <section class="h-screen w-screen overflow-hidden bg-white">
     <div class="flex flex-col md:flex-row h-full w-full">
       <!-- Panel Kiri (Visual) -->
-      <div class="hidden md:block md:w-2/5 bg-blue-400">
-        <div class="hidden mt-40 md:flex relative overflow-hidden items-center justify-center p-12 text-white">
-          <div class="absolute top-0 left-0 w-full h-full z-0 opacity-10">
-            <div class="absolute -top-1/4 -left-1/4 w-96 h-96 bg-white rounded-full animate-pulse animation-delay-600"></div>
-            <div class="absolute -bottom-1/4 -right-1/4 w-72 h-72 bg-white rounded-full animate-pulse animation-delay-400"></div>
-            <div class="absolute top-1/2 left-1/4 w-48 h-48 bg-white rounded-full animate-pulse animation-delay-200"></div>
+      <div class="hidden md:flex md:w-2/5 bg-linear-to-br from-purple-600 via-blue-500 to-cyan-400 relative overflow-hidden">
+        <div class="absolute inset-0 bg-black opacity-10"></div>
+
+        <div class="absolute top-0 left-0 w-64 h-64 bg-white opacity-10 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+        <div class="absolute bottom-0 right-0 w-96 h-96 bg-white opacity-10 rounded-full translate-x-1/2 translate-y-1/2"></div>
+
+        <div class="relative z-10 w-full flex flex-col justify-center items-start px-12">
+          <div class="animate-slide-in opacity-0 mb-6">
+            <RouterLink to="/">
+              <img src="/logo_sinergi_white.png" alt="Sinergi Logo" class="h-16 mb-4" />
+            </RouterLink>
+          </div>
+
+          <div class="animate-slide-in opacity-0 delay-100 mb-8">
+            <img src="/landingpage.png" alt="Collaboration Illustration" class="max-w-calc[100%] h-auto" />
+          </div>
+
+          <div class="animate-slide-in opacity-0 delay-200">
+            <h1 class="text-4xl text-white font-bold mb-4 leading-tight">
+              Selamat Datang di <br /><span class="underline">S</span>istem <span class="underline">In</span>teraksi <span class="underline">E</span>dukasi <span class="underline">R</span>iset <span class="underline">G</span>agasan dan
+              <span class="underline">I</span>novasi
+            </h1>
           </div>
         </div>
       </div>
@@ -153,34 +169,45 @@ const onProfileCompleted = () => {
 </template>
 
 <style scoped>
-@keyframes slideInUp {
+@keyframes slideInFromRight {
   from {
-    transform: translateY(20px);
     opacity: 0;
+    transform: translateX(100px);
   }
   to {
-    transform: translateY(0);
     opacity: 1;
+    transform: translateX(0);
   }
 }
 
-.animate-slide-in-up {
-  animation: slideInUp 0.8s ease-out forwards;
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(255, 255, 255, 0.5);
+  }
 }
 
-/* Delay animasi */
-.animation-delay-200 {
+.animate-slide-in {
+  animation: slideInFromRight 0.8s ease-out forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.delay-100 {
+  animation-delay: 0.1s;
+}
+.delay-200 {
   animation-delay: 0.2s;
-  opacity: 0;
 }
-
-.animation-delay-400 {
+.delay-300 {
+  animation-delay: 0.3s;
+}
+.delay-400 {
   animation-delay: 0.4s;
-  opacity: 0;
-}
-
-.animation-delay-600 {
-  animation-delay: 0.6s;
-  opacity: 0;
 }
 </style>

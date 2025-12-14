@@ -330,7 +330,7 @@ onMounted(() => {
                 <div class="w-2 h-6 bg-red-500 rounded-full"></div>
                 <h2 class="font-bold text-gray-800">Laporan Konten Baru</h2>
               </div>
-              <Tag :value="pendingReports.length + ' Pending'" severity="danger" rounded></Tag>
+              <Tag :value="pendingReports.length + ' Open'" severity="danger" rounded></Tag>
             </div>
 
             <div class="p-1 grow">

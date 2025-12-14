@@ -28,15 +28,44 @@ export default {
   },
 
   // Kirim jawaban
-  createRespond(slug, forumId, message, parentId = null) {
-    const formData = new FormData();
-    formData.append("message", message);
-    formData.append("parent_id", parentId);
+  createRespond(slug, forumId, formData) {
     return apiClient.post(`/communities/${slug}/forums/${forumId}/responds`, formData);
   },
 
   // Tandai solusi (Mark Accepted)
   markAsAccepted(slug, forumId, respondId) {
     return apiClient.post(`/communities/${slug}/forums/${forumId}/responds/${respondId}/accept`);
+  },
+
+  // Vote Topik Forum (Pertanyaan Utama)
+  // Endpoint: POST api/reactions/forums/{forumId}
+  voteForum(forumId, reactionValue) {
+    // reactionValue: 1 (up), -1 (down)
+    // Controller membaca $_POST['reaction'], axios otomatis mengirim JSON.
+    // Jika backend Anda tidak otomatis mengubah JSON ke $_POST, Anda mungkin perlu format form-data.
+    // Asumsi: Backend Anda bisa baca JSON body atau Anda menggunakan header form-urlencoded.
+    return apiClient.post(
+      `/reactions/forums/${forumId}`,
+      {
+        reaction: reactionValue,
+      },
+      {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" }, // Jaga-jaga agar terbaca $_POST murni
+      }
+    );
+  },
+
+  // Vote Jawaban (Respond)
+  // Endpoint: POST api/reactions/forumrespond/{forumRespondId}
+  voteAnswer(respondId, reactionValue) {
+    return apiClient.post(
+      `/reactions/forumrespond/${respondId}`,
+      {
+        reaction: reactionValue,
+      },
+      {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      }
+    );
   },
 };

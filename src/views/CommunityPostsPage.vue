@@ -7,7 +7,8 @@ import communityApi from "@/services/communityApi";
 import PostCard from "@/components/Posts/PostCard.vue";
 import likeApi from "@/services/likeApi";
 import { useToast } from "primevue";
-import _ from "lodash"; // Import lodash untuk debounce
+import _ from "lodash";
+import { useAuthStore } from "@/store/auth";
 
 const props = defineProps({
   community: {
@@ -19,6 +20,7 @@ const props = defineProps({
 const emit = defineEmits(["refreshCommunity"]);
 
 const toast = useToast();
+const authStore = useAuthStore();
 const posts = ref([]);
 const loadingPosts = ref(true);
 const loadingNextPage = ref(false);
@@ -28,17 +30,25 @@ const canCreatePosts = ref(false);
 // State Pagination & Search
 const page = ref(1);
 const hasMore = ref(true);
-const searchQuery = ref(""); // State untuk pencarian
+const searchQuery = ref("");
 const loadTrigger = ref(null);
 const observer = ref(null);
 
 const isJoining = ref(false);
 
+// --- MODIFIKASI 1: DEFINISIKAN ADMIN ---
+// Helper computed agar mudah dipakai di template dan script
+const isAdmin = computed(() => {
+  return authStore.user?.role === "Admin"; // Sesuaikan casing jika di DB 'ADMIN'
+});
+
+// --- MODIFIKASI 2: LOGIKA GUEST ---
+// Admin tidak boleh dianggap Guest, agar tidak terkena limit 5 postingan
 const isGuest = computed(() => {
+  if (isAdmin.value) return false; // Admin bebas akses
   return props.community.is_public && props.community.user_membership_status !== "GRANTED";
 });
 
-// Update loadPosts untuk menerima searchQuery
 const loadPosts = async (isReset = false) => {
   if (isReset) {
     loadingPosts.value = true;
@@ -52,7 +62,6 @@ const loadPosts = async (isReset = false) => {
   if (!isReset) loadingNextPage.value = true;
 
   try {
-    // Kirim searchQuery ke API
     const response = await postApi.getAllPostCommunities(props.community.slug, page.value, searchQuery.value);
     const newPosts = response.data.data;
 
@@ -69,6 +78,7 @@ const loadPosts = async (isReset = false) => {
         posts.value.push(...newPosts);
       }
 
+      // Logic limit guest tetap jalan untuk user biasa, tapi Admin di-bypass via computed isGuest
       if (isGuest.value && posts.value.length >= 5) {
         hasMore.value = false;
       } else if (hasMore.value) {
@@ -83,10 +93,8 @@ const loadPosts = async (isReset = false) => {
   }
 };
 
-// --- LOGIC PENCARIAN (DEBOUNCE) ---
-// Menunggu 500ms setelah user berhenti mengetik sebelum request ke API
 const handleSearch = _.debounce(() => {
-  loadPosts(true); // Load ulang dari page 1 dengan query baru
+  loadPosts(true);
 }, 500);
 
 const handleJoin = async () => {
@@ -141,11 +149,13 @@ const handleDeletePost = async (postId) => {
   }
 };
 
+// --- MODIFIKASI 3: PERIZINAN ---
 const checkRoleInCommunity = () => {
   const isPublic = props.community.is_public;
   const isMember = props.community.user_membership_status === "GRANTED";
 
-  if (isPublic || isMember) {
+  // Logic View: Publik ATAU Member ATAU Admin
+  if (isPublic || isMember || isAdmin.value) {
     canViewPosts.value = true;
     loadPosts(true);
   } else {
@@ -153,6 +163,7 @@ const checkRoleInCommunity = () => {
     loadingPosts.value = false;
   }
 
+  // Logic Create: Member ATAU Admin
   if (isMember) {
     canCreatePosts.value = true;
   } else {
@@ -187,18 +198,9 @@ onUnmounted(() => {
 
 <template>
   <div class="w-full grow xl:w-3/5 flex flex-col items-center justify-center max-w-[600px] lg:max-w-[690px] pt-4 lg:pt-2">
-    <!-- 1. CEK IZIN VIEW DULU (Level Tertinggi) -->
     <template v-if="canViewPosts">
-      <!-- 
-          PERUBAHAN UTAMA DI SINI:
-          CreatePost dan SearchBar diletakkan SEBELUM pengecekan 'loadingPosts'.
-          Ini membuat elemen ini TIDAK dihancurkan saat loading dipicu ulang (search).
-      -->
-
-      <!-- A. CREATE POST -->
       <CreatePost v-if="canCreatePosts && !searchQuery" :communitySlug="community?.slug" :communityName="community?.name" @postCreated="() => loadPosts(true)" />
 
-      <!-- B. SEARCH BAR -->
       <div v-if="canCreatePosts" class="w-full mb-4 relative">
         <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none">
           <i class="fas fa-search text-gray-400"></i>
@@ -222,14 +224,11 @@ onUnmounted(() => {
         </button>
       </div>
 
-      <!-- C. KONTEN POSTINGAN (LOADING / HASIL) -->
-      <!-- Loading state hanya membungkus area list postingan -->
       <template v-if="loadingPosts">
         <PostCardSkeleton v-for="n in 3" :key="n" />
       </template>
 
       <template v-else>
-        <!-- HASIL PENCARIAN KOSONG -->
         <div v-if="posts.length === 0" class="bg-white border border-gray-200 rounded-xl p-8 mt-5 text-center text-gray-500">
           <i class="fas fa-search text-4xl mb-3 text-gray-300"></i>
           <p v-if="searchQuery">
@@ -239,7 +238,6 @@ onUnmounted(() => {
           <p v-else>Belum ada postingan di komunitas ini.</p>
         </div>
 
-        <!-- LIST POSTINGAN -->
         <template v-else>
           <div v-if="searchQuery" class="w-full mb-4 text-sm text-gray-500 px-1">
             Menampilkan hasil pencarian untuk "<b>{{ searchQuery }}</b
@@ -248,7 +246,7 @@ onUnmounted(() => {
 
           <PostCard
             v-for="post in posts"
-            :isShowInteractivity="community.user_membership_status === 'GRANTED'"
+            :isShowInteractivity="community.user_membership_status === 'GRANTED' || isAdmin"
             :key="post.id"
             :post="post"
             @toggleLike="handleToggleLike"
@@ -256,7 +254,6 @@ onUnmounted(() => {
             @changeCommentCount="handleChangeCommentCount"
           />
 
-          <!-- LIMIT GUEST / LOAD MORE -->
           <div v-if="isGuest && posts.length >= 5" class="w-full bg-blue-50 border border-blue-100 rounded-xl p-6 mb-8 text-center shadow-sm">
             <i class="fa-solid fa-layer-group text-3xl text-blue-500 mb-3"></i>
             <h3 class="font-bold text-gray-900 text-lg">Ingin melihat lebih banyak?</h3>
@@ -281,9 +278,7 @@ onUnmounted(() => {
         </template>
       </template>
     </template>
-    <!-- End canViewPosts -->
 
-    <!-- 2. JIKA TIDAK ADA IZIN VIEW -->
     <template v-else>
       <div class="bg-white border border-gray-200 rounded-xl p-6 mt-5 text-center text-gray-500">
         <i class="fas fa-lock text-3xl mb-4"></i>

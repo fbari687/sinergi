@@ -6,6 +6,10 @@ import Dialog from "primevue/dialog";
 import Paginator from "primevue/paginator";
 import reportApi from "@/services/reportApi";
 
+// --- IMPORT BARU: Component Dialog Postingan ---
+import postApi from "@/services/postApi";
+import PostReadOnlyContent from "@/components/Posts/PostReadOnlyContent.vue";
+
 const toast = useToast();
 
 // STATE
@@ -19,13 +23,18 @@ const total = ref(0);
 const selectedStatus = ref("OPEN");
 const searchQuery = ref("");
 
-// Detail modal
+// Detail modal (Laporan)
 const showDetailDialog = ref(false);
 const detailLoading = ref(false);
 const selectedSummary = ref(null);
 const detailReports = ref([]);
 const detailTarget = ref(null);
 const isActionLoading = ref(false);
+
+// --- STATE BARU: Untuk Dialog Full Post ---
+const showPostDialog = ref(false);
+const isFetchingPost = ref(false);
+const fullPostData = ref(null);
 
 const statusOptions = [
   { label: "Open", value: "OPEN" },
@@ -39,7 +48,6 @@ const statusOptions = [
 const formatDateTime = (value) => {
   if (!value) return "-";
   const date = new Date(value);
-  // contoh: 02 Des 2025, 16.23
   return date.toLocaleString("id-ID", {
     day: "2-digit",
     month: "short",
@@ -77,7 +85,7 @@ const fetchReports = async () => {
 
 onMounted(fetchReports);
 
-// Search client-side di atas hasil page saat ini
+// Search client-side
 const filteredReports = computed(() => {
   const q = searchQuery.value.toLowerCase();
   if (!q) return reports.value;
@@ -105,7 +113,7 @@ const statusBadgeClass = (status) => {
 };
 
 const onPageChange = (event) => {
-  page.value = event.page + 1; // PrimeVue pakai 0-based
+  page.value = event.page + 1;
   perPage.value = event.rows;
   fetchReports();
 };
@@ -142,6 +150,60 @@ const openDetail = async (summaryItem) => {
   } finally {
     detailLoading.value = false;
   }
+};
+
+// --- FUNGSI BARU: Membuka Dialog Postingan Penuh ---
+const openFullPostContent = async () => {
+  // Pastikan kita punya ID postingan
+  // reportable_id dari selectedSummary adalah ID postingan tersebut
+  const postId = selectedSummary.value?.reportable_id;
+
+  if (!postId) {
+    toast.add({ severity: "warn", summary: "Error", detail: "ID Postingan tidak ditemukan", life: 3000 });
+    return;
+  }
+
+  isFetchingPost.value = true;
+
+  try {
+    // 1. Request data lengkap postingan dari API
+    const response = await postApi.getPostById(postId);
+
+    // 2. Masukkan data lengkap ke state
+    fullPostData.value = response.data.data;
+
+    // 3. Baru buka dialognya
+    showPostDialog.value = true;
+  } catch (err) {
+    console.error("Gagal memuat postingan:", err);
+    toast.add({
+      severity: "error",
+      summary: "Gagal",
+      detail: "Postingan mungkin sudah dihapus atau tidak ditemukan.",
+      life: 3000,
+    });
+  } finally {
+    isFetchingPost.value = false;
+  }
+};
+
+// --- FUNGSI DUMMY: Menghandle event dari PostCommentDialog agar tidak error ---
+// (Opsional: Admin mungkin tidak perlu like, tapi perlu handle delete)
+const handleAdminLike = (postId) => {
+  console.log("Admin liked post:", postId);
+  // Implementasi like jika admin boleh like, atau biarkan kosong
+};
+
+const handleAdminCommentCount = (postId, count) => {
+  if (fullPostData.value && fullPostData.value.id === postId) {
+    fullPostData.value.comment_count = count;
+  }
+};
+
+const handleAdminDeletePost = async (postId) => {
+  // Gunakan fungsi deleteContent yang sudah ada
+  await deleteContent();
+  showPostDialog.value = false; // Tutup dialog post setelah delete
 };
 
 const applyStatus = async (status) => {
@@ -203,9 +265,7 @@ const deleteContent = async () => {
 
 <template>
   <LayoutAdminUser>
-    <!-- Konten Dashboard -->
     <div class="w-full max-w-full pt-4 md:pt-0 md:mt-24 px-4 md:px-8">
-      <!-- Header -->
       <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-3">
         <div>
           <h1 class="text-3xl font-bold text-gray-900">Kelola Laporan</h1>
@@ -213,9 +273,7 @@ const deleteContent = async () => {
         </div>
       </div>
 
-      <!-- RINGKASAN & FILTER -->
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
-        <!-- Total Laporan Card -->
         <div class="bg-white p-5 rounded-xl shadow-md border-t-4 border-blue-600 flex justify-between items-center transition-transform hover:scale-[1.01]">
           <div>
             <p class="text-sm font-semibold text-gray-500">Total Target Dilaporkan</p>
@@ -226,7 +284,6 @@ const deleteContent = async () => {
           </div>
         </div>
 
-        <!-- Status Filters -->
         <div class="lg:col-span-3 flex flex-col justify-center gap-2 p-4 bg-white rounded-xl shadow-md border border-gray-200">
           <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Filter Status Laporan</span>
           <div class="flex flex-wrap items-center gap-2">
@@ -243,7 +300,6 @@ const deleteContent = async () => {
         </div>
       </div>
 
-      <!-- Toolbar: search -->
       <div class="mb-4 flex flex-col md:flex-row gap-3 md:items-center md:justify-end">
         <div class="relative w-full md:w-80">
           <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -253,7 +309,6 @@ const deleteContent = async () => {
         </div>
       </div>
 
-      <!-- Table Container -->
       <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
         <div v-if="loading" class="p-12 text-center text-gray-400 flex flex-col items-center justify-center gap-3">
           <i class="fa-solid fa-circle-notch fa-spin text-3xl text-blue-500"></i>
@@ -273,10 +328,8 @@ const deleteContent = async () => {
             </thead>
             <tbody class="divide-y divide-gray-100">
               <tr v-for="item in filteredReports" :key="item.reportable_type + '-' + item.reportable_id" class="hover:bg-blue-50/40 transition-colors duration-150">
-                <!-- Kolom Target -->
                 <td class="px-6 py-4">
                   <div class="flex items-start gap-4">
-                    <!-- Thumbnail dengan fallback icon -->
                     <div class="shrink-0 relative group">
                       <img v-if="item.target_preview?.thumbnail" :src="item.target_preview.thumbnail" alt="thumb" class="w-12 h-12 rounded-lg object-cover border border-gray-200 shadow-sm" />
                       <div v-else class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center border border-gray-200 text-gray-400">
@@ -295,14 +348,12 @@ const deleteContent = async () => {
                   </div>
                 </td>
 
-                <!-- Kolom Total -->
                 <td class="px-6 py-4 text-center">
                   <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-800 font-bold text-sm border border-gray-200">
                     {{ item.total_reports }}
                   </span>
                 </td>
 
-                <!-- Kolom Waktu -->
                 <td class="px-6 py-4 text-xs text-gray-500 whitespace-nowrap font-medium">
                   <div class="flex items-center gap-2">
                     <i class="fa-regular fa-clock"></i>
@@ -310,7 +361,6 @@ const deleteContent = async () => {
                   </div>
                 </td>
 
-                <!-- Kolom Status -->
                 <td class="px-6 py-4">
                   <span class="inline-flex items-center px-3 py-1 text-xs font-bold rounded-full border shadow-sm" :class="statusBadgeClass(item.status)">
                     <i
@@ -321,7 +371,6 @@ const deleteContent = async () => {
                   </span>
                 </td>
 
-                <!-- Kolom Aksi -->
                 <td class="px-6 py-4 text-center">
                   <button
                     class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 hover:text-blue-800 rounded-lg transition-all shadow-sm border border-blue-100"
@@ -333,7 +382,6 @@ const deleteContent = async () => {
                 </td>
               </tr>
 
-              <!-- Empty State -->
               <tr v-if="!filteredReports.length && !loading">
                 <td colspan="5" class="px-6 py-16 text-center">
                   <div class="flex flex-col items-center gap-4 text-gray-400">
@@ -348,14 +396,12 @@ const deleteContent = async () => {
             </tbody>
           </table>
 
-          <!-- Pagination -->
           <div class="border-t border-gray-100 px-4 py-3 bg-gray-50/50 flex justify-end">
             <Paginator :rows="perPage" :totalRecords="total" :first="(page - 1) * perPage" :rowsPerPageOptions="[5, 10, 20, 50]" @page="onPageChange" />
           </div>
         </div>
       </div>
 
-      <!-- DETAIL MODAL -->
       <Dialog
         v-model:visible="showDetailDialog"
         modal
@@ -375,11 +421,9 @@ const deleteContent = async () => {
           </div>
 
           <div v-else-if="detailTarget" class="flex flex-col gap-6">
-            <!-- Target Preview Card -->
             <div class="bg-linear-to-r from-gray-50 to-white border border-gray-200 rounded-xl p-5 flex gap-5 items-start shadow-sm relative overflow-hidden">
               <div class="absolute top-0 right-0 w-20 h-20 bg-gray-100 rounded-bl-full opacity-50 -mr-10 -mt-10"></div>
 
-              <!-- Thumbnail -->
               <div class="shrink-0 relative z-10">
                 <img v-if="detailTarget?.thumbnail" :src="detailTarget.thumbnail" alt="target-image" class="w-20 h-20 rounded-xl object-cover border border-white shadow-md" />
                 <div v-else class="w-20 h-20 rounded-xl bg-gray-200 flex items-center justify-center border border-white shadow-md text-gray-400">
@@ -407,10 +451,18 @@ const deleteContent = async () => {
                     {{ selectedSummary?.total_reports }}
                   </span>
                 </div>
+
+                <div v-if="detailTarget.type_label === 'Post' || selectedSummary?.reportable_type === 'Post'" class="mt-3">
+                  <button @click="openFullPostContent" :disabled="isFetchingPost" class="text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50 disabled:cursor-wait">
+                    <i v-if="isFetchingPost" class="fa-solid fa-circle-notch fa-spin"></i>
+                    <i v-else class="fa-solid fa-external-link-alt"></i>
+
+                    <span>{{ isFetchingPost ? "Memuat Postingan..." : "Lihat Postingan Lengkap" }}</span>
+                  </button>
+                </div>
               </div>
             </div>
 
-            <!-- List Reports -->
             <div>
               <h4 class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
                 <i class="fa-solid fa-list-ul text-gray-400"></i>
@@ -435,7 +487,6 @@ const deleteContent = async () => {
                     </span>
                   </div>
 
-                  <!-- REASON -->
                   <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 text-sm text-gray-700 relative">
                     <i class="fa-solid fa-quote-left absolute top-2 left-2 text-gray-200 text-xl z-0"></i>
                     <p class="relative z-10 whitespace-pre-line pl-1">
@@ -457,7 +508,6 @@ const deleteContent = async () => {
               </div>
             </div>
 
-            <!-- Actions Footer -->
             <div class="pt-4 border-t border-gray-100 flex flex-col md:flex-row md:justify-between items-center gap-4">
               <div class="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
                 <span class="font-semibold">Status Saat Ini:</span>
@@ -509,6 +559,36 @@ const deleteContent = async () => {
             </div>
           </div>
         </div>
+      </Dialog>
+
+      <Dialog
+        v-model:visible="showPostDialog"
+        modal
+        :header="'Tinjauan Postingan: ' + (fullPostData?.user?.username || 'User')"
+        :style="{ width: '600px' }"
+        :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
+        :draggable="false"
+        dismissableMask
+      >
+        <div v-if="fullPostData" class="p-1">
+          <PostReadOnlyContent :post="fullPostData" />
+        </div>
+
+        <template #footer>
+          <div class="flex justify-end gap-2 pt-2">
+            <button @click="showPostDialog = false" class="px-4 py-2 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Tutup</button>
+
+            <button
+              @click="
+                deleteContent();
+                showPostDialog = false;
+              "
+              class="px-4 py-2 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow-sm"
+            >
+              Hapus Postingan Ini
+            </button>
+          </div>
+        </template>
       </Dialog>
     </div>
   </LayoutAdminUser>

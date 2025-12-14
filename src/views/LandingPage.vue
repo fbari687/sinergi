@@ -26,7 +26,7 @@
 
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10">
       <nav class="flex justify-between items-center mb-6 sm:mb-8 lg:mb-10 animate-fade-in-up">
-        <div class="text-white text-base sm:text-lg lg:text-xl font-bold"><img src="/logo_sinergi.png" class="h-12" alt="logo" /></div>
+        <div class="text-white text-base sm:text-lg lg:text-xl font-bold"><img src="/logo_sinergi_white.png" class="h-12" alt="logo" /></div>
         <RouterLink to="/login" class="text-white hover:text-gray-200 transition-colors backdrop-blur-md bg-white/10 border border-white/20 px-3 sm:px-4 lg:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm">
           <i class="fas fa-sign-in-alt mr-1"></i>Masuk
         </RouterLink>

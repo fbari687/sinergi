@@ -5,7 +5,7 @@ import { onMounted, provide, ref, watch } from "vue";
 import { Button, useToast } from "primevue";
 import CommentTile from "@/components/Comments/CommentTile.vue";
 import CommentTileSkeleton from "@/components/Comments/CommentTileSkeleton.vue";
-import { formatTimeAgo } from "@/utils/formatDate";
+import { formatTimeAgo, formatIndonesianDate } from "@/utils/formatDate";
 import NumberFlow from "@number-flow/vue";
 import PostOptionsPopover from "./PostOptionsPopover.vue";
 import Image from "primevue/image";
@@ -144,6 +144,25 @@ watch(
   }
 );
 
+const getRoleColor = (role) => {
+  switch (role) {
+    case "Admin":
+      return "bg-gray-800 text-white";
+    case "Dosen":
+      return "bg-emerald-100 text-emerald-700 border-emerald-200";
+    case "Mahasiswa":
+      return "bg-blue-100 text-blue-700 border-blue-200";
+    case "Alumni":
+      return "bg-purple-100 text-purple-700 border-purple-200";
+    case "Mitra":
+      return "bg-orange-100 text-orange-700 border-orange-200";
+    case "Pakar":
+      return "bg-rose-100 text-rose-700 border-rose-200";
+    default:
+      return "bg-gray-100 text-gray-700";
+  }
+};
+
 onMounted(loadComments);
 </script>
 
@@ -152,12 +171,20 @@ onMounted(loadComments);
     <div class="flex-1 p-4 space-y-6 overflow-y-auto pb-24">
       <div>
         <div class="flex items-start">
-          <img :src="post.user.profile_picture" alt="Profile" class="w-12 h-12 rounded-full mr-3 object-cover" />
+          <RouterLink :to="`/profile/${post.user.username}`">
+            <img :src="post.user.profile_picture" alt="Profile" class="w-12 h-12 rounded-full mr-3 object-cover" />
+          </RouterLink>
           <div class="grow">
-            <RouterLink to="#" class="text-base font-bold border-b border-b-transparent transition duration-150 hover:border-b-black">
-              {{ post.user.username }} <span class="text-sm font-normal text-gray-600">({{ post.user.id == authStore.user.id ? "Anda" : post.user.role }})</span>
+            <RouterLink :to="`/profile/${post.user.username}`" class="flex items-center w-fit gap-1 text-base text-black font-bold m-0 border-b border-b-transparent transition duration-150 hover:border-b-black">
+              <span>
+                {{ post.user.username }}
+              </span>
+              <span v-if="post.user.id != authStore.user.id" class="items-center px-1.5 text-[10px] font-bold border shadow-sm rounded-full" :class="getRoleColor(post.user.role)">
+                {{ post.user.role }}
+              </span>
+              <span v-else class="items-center px-1.5 text-[10px] font-bold border shadow-sm rounded-full" :class="getRoleColor('default')"> Anda </span>
             </RouterLink>
-            <p class="text-xs text-gray-500 mt-1">{{ formatTimeAgo(post.created_at) }}</p>
+            <p class="text-xs text-gray-500 mt-1 m-0">{{ post.is_edited ? formatIndonesianDate(post.created_at) + ` (Telah disunting ${formatTimeAgo(post.updated_at)})` : formatTimeAgo(post.created_at) }}</p>
           </div>
           <PostOptionsPopover :post="post" @deletePost="deletePost" />
         </div>

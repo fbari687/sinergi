@@ -128,8 +128,30 @@ onUnmounted(() => {
 <template>
   <section class="h-screen w-screen overflow-hidden bg-white">
     <div class="flex flex-col md:flex-row h-full w-full">
-      <div class="hidden md:block md:w-2/5 bg-blue-400">
-        <!-- Konten animasi yang ada di file Anda sebelumnya bisa ditaruh di sini lagi jika mau -->
+      <div class="hidden md:flex md:w-2/5 bg-linear-to-br from-purple-600 via-blue-500 to-cyan-400 relative overflow-hidden">
+        <div class="absolute inset-0 bg-black opacity-10"></div>
+
+        <div class="absolute top-0 left-0 w-64 h-64 bg-white opacity-10 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+        <div class="absolute bottom-0 right-0 w-96 h-96 bg-white opacity-10 rounded-full translate-x-1/2 translate-y-1/2"></div>
+
+        <div class="relative z-10 w-full flex flex-col justify-center items-start px-12">
+          <div class="animate-slide-in opacity-0 mb-6">
+            <RouterLink to="/">
+              <img src="/logo_sinergi_white.png" alt="Sinergi Logo" class="h-16 mb-4" />
+            </RouterLink>
+          </div>
+
+          <div class="animate-slide-in opacity-0 delay-100 mb-8">
+            <img src="/landingpage.png" alt="Collaboration Illustration" class="max-w-calc[100%] h-auto" />
+          </div>
+
+          <div class="animate-slide-in opacity-0 delay-200">
+            <h1 class="text-4xl text-white font-bold mb-4 leading-tight">
+              Selamat Datang di <br /><span class="underline">S</span>istem <span class="underline">In</span>teraksi <span class="underline">E</span>dukasi <span class="underline">R</span>iset <span class="underline">G</span>agasan dan
+              <span class="underline">I</span>novasi
+            </h1>
+          </div>
+        </div>
       </div>
 
       <div class="w-full md:w-3/5 h-full flex justify-center items-center p-6 md:p-0">
@@ -211,4 +233,46 @@ onUnmounted(() => {
   </section>
 </template>
 
-<style scoped></style>
+<style scoped>
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(255, 255, 255, 0.5);
+  }
+}
+
+.animate-slide-in {
+  animation: slideInFromRight 0.8s ease-out forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.delay-100 {
+  animation-delay: 0.1s;
+}
+.delay-200 {
+  animation-delay: 0.2s;
+}
+.delay-300 {
+  animation-delay: 0.3s;
+}
+.delay-400 {
+  animation-delay: 0.4s;
+}
+</style>
