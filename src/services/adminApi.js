@@ -2,8 +2,19 @@ import apiClient from "./axios";
 
 export default {
   // Dashboard overview
-  getDashboardOverview() {
-    return apiClient.get("/admin/dashboard/overview");
+  getDashboardOverview(period, type) {
+    return apiClient.get("/admin/dashboard/overview", {
+      params: {
+        period: period,
+        type: type,
+      },
+    });
+  },
+
+  getGlobalLeaderboard(period) {
+    return apiClient.get("/admin/leaderboard", {
+      params: { period },
+    });
   },
 
   // Ambil daftar request (bisa filter by status)

@@ -39,28 +39,6 @@ const items = computed(() => [
         },
       },
       {
-        label: "Akses Dashboard",
-        icon: "fas fa-chart-line",
-        // Tampil jika: Role ADMIN DAN TIDAK sedang berada di halaman admin
-        visible: authStore.user?.role === "Admin" && !route.path.startsWith("/admin"),
-        command: () => {
-          if (authStore.user) {
-            router.push(`/admin/dashboard`);
-          }
-        },
-      },
-      {
-        label: "Akses Sinergi",
-        icon: "fas fa-home",
-        // Tampil jika: Role ADMIN DAN SEDANG berada di halaman admin
-        visible: authStore.user?.role === "Admin" && route.path.startsWith("/admin"),
-        command: () => {
-          if (authStore.user) {
-            router.push(`/home`);
-          }
-        },
-      },
-      {
         separator: true,
       },
       {

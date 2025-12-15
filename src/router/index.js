@@ -31,9 +31,10 @@ import AdminCommunityForums from "@/views/Admins/AdminCommunityForums.vue";
 import AdminCommunityMembers from "@/views/Admins/AdminCommunityMembers.vue";
 import AdminForumDetail from "@/views/Admins/AdminForumDetail.vue";
 import CommunityLeaderboardPage from "@/views/CommunityLeaderboardPage.vue";
+import AdminLeaderboardPage from "@/views/Admins/AdminLeaderboardPage.vue";
 
 const allRoles = ["Admin", "Dosen", "Mahasiswa", "Alumni", "Mitra", "Pakar"];
-const internalRoles = ["Admin", "Dosen", "Mahasiswa"];
+const internalRoles = ["Dosen", "Mahasiswa"];
 const externalRoles = ["Alumni", "Mitra", "Pakar"];
 
 const routes = [
@@ -180,6 +181,12 @@ const routes = [
     },
   },
   {
+    path: "/admin/leaderboard",
+    name: "AdminLeaderboard",
+    component: AdminLeaderboardPage,
+    meta: { roles: ["Admin"] },
+  },
+  {
     path: "/admin/users",
     name: "AdminUsersManage",
     component: ManageUsersPage,
@@ -293,6 +300,9 @@ router.beforeEach(async (to, from, next) => {
 
   if (to.name === "HomePage" && isLoggedIn && externalRoles.includes(userRole)) {
     return next({ name: "YourCommunities" });
+  }
+  if (to.name === "HomePage" && isLoggedIn && userRole === "Admin") {
+    return next({ name: "AdminDashboard" });
   }
   if (to.name === "Communities" && isLoggedIn && externalRoles.includes(userRole)) {
     return next({ name: "YourCommunities" });
