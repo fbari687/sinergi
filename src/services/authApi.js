@@ -23,4 +23,17 @@ export default {
   activateExternalAccount(payload) {
     return apiClient.post("/activate-account", payload);
   },
+  requestForgotPasswordOtp(formData) {
+    return apiClient.post("/forgot-password/request", formData);
+  },
+
+  // 2. Verifikasi OTP Lupa Password
+  verifyForgotPasswordOtp(formData) {
+    return apiClient.post("/forgot-password/verify", formData);
+  },
+
+  // 3. Reset Password Baru
+  resetPassword(formData) {
+    return apiClient.post("/forgot-password/reset", formData);
+  },
 };

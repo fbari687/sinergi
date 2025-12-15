@@ -156,7 +156,7 @@ const onProfileCompleted = () => {
             />
           </form>
 
-          <a href="reset_password.html" class="text-gray-600 text-sm mb-4 no-underline hover:underline"> Forgot Password? </a>
+          <RouterLink to="/forgotpassword" class="text-gray-600 text-sm mb-4 no-underline hover:underline"> Forgot Password? </RouterLink>
 
           <p class="text-sm text-gray-600">
             Belum punya akun?

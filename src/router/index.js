@@ -22,6 +22,7 @@ import NotificationPage from "@/views/NotificationPage.vue";
 import ActivateAccountPage from "@/views/Auth/ActivateAccountPage.vue";
 import LandingPage from "@/views/LandingPage.vue";
 import CommunityDashboardPage from "@/views/CommunityDashboardPage.vue";
+import ForgotPasswordPage from "@/views/ForgotPasswordPage.vue";
 
 const allRoles = ["Admin", "Dosen", "Mahasiswa", "Alumni", "Mitra", "Pakar"];
 const internalRoles = ["Admin", "Dosen", "Mahasiswa"];
@@ -61,6 +62,14 @@ const routes = [
     path: "/register",
     name: "RegisterPage",
     component: RegisterPage,
+    meta: {
+      publicOnly: true,
+    },
+  },
+  {
+    path: "/forgotpassword",
+    name: "ForgotPasswordPage",
+    component: ForgotPasswordPage,
     meta: {
       publicOnly: true,
     },
@@ -131,6 +140,9 @@ const routes = [
     name: "ForumDetail",
     component: ForumDetail,
     props: true, // Agar slug dan forumId masuk sebagai props
+    meta: {
+      roles: allRoles,
+    },
   },
   {
     path: "/profile/:username",

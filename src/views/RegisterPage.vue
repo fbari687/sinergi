@@ -162,31 +162,33 @@ onUnmounted(() => {
           <!-- Ganti action="verify-otp.html" sesuai alur registrasi Anda -->
           <form @submit.prevent="handleRegister" class="w-full flex flex-col">
             <Message v-if="error" severity="error" :closable="false">{{ error }}</Message>
-            <input
-              id="email"
-              v-model="email"
-              type="text"
-              placeholder="email@domain.com"
-              required
-              class="mt-4 bg-gray-100 border-none h-11 px-4 mb-4 rounded-lg text-base font-['Poppins'] focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <input id="username" v-model="username" type="text" placeholder="Username" required class="bg-gray-100 border-none h-11 px-4 mb-4 rounded-lg text-base font-['Poppins'] focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            <div class="flex w-full items-center justify-between bg-gray-100 border-none h-11 pl-4 pr-2 mb-4 rounded-lg text-base focus-within:ring-2 focus-within:ring-blue-500">
-              <input id="password" v-model="password" :type="showPassword ? 'text' : 'password'" placeholder="Password" required class="focus:outline-none w-full bg-gray-100" />
-              <button type="button" @click="showPassword = !showPassword" class="inset-y-0 flex items-center justify-center h-full w-10 text-gray-500 hover:text-gray-700 focus:outline-none" aria-label="Toggle password visibility">
-                <i class="fas" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
-              </button>
+            <div class="w-full flex flex-col mb-2">
+              <input id="email" v-model="email" type="text" placeholder="email@domain.com" required class="mt-4 bg-gray-100 border-none h-11 px-4 rounded-lg text-base font-['Poppins'] focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <small class="text-xs text-red-500">*Gunakan email PNJ</small>
             </div>
-            <div class="flex w-full items-center justify-between bg-gray-100 border-none h-11 pl-4 pr-2 mb-4 rounded-lg text-base focus-within:ring-2 focus-within:ring-blue-500">
-              <input id="retypepassword" v-model="retypepassword" :type="showConfirmationPassword ? 'text' : 'password'" placeholder="Confirmation Password" required class="focus:outline-none w-full bg-gray-100" />
-              <button
-                type="button"
-                @click="showConfirmationPassword = !showConfirmationPassword"
-                class="inset-y-0 flex items-center justify-center h-full w-10 text-gray-500 hover:text-gray-700 focus:outline-none"
-                aria-label="Toggle password visibility"
-              >
-                <i class="fas" :class="showConfirmationPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
-              </button>
+            <input id="username" v-model="username" type="text" placeholder="Username" required class="bg-gray-100 border-none h-11 px-4 mb-4 rounded-lg text-base font-['Poppins'] focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <div class="w-full flex flex-col mb-2">
+              <div class="flex w-full items-center justify-between bg-gray-100 border-none h-11 pl-4 pr-2 rounded-lg text-base focus-within:ring-2 focus-within:ring-blue-500">
+                <input id="password" v-model="password" :type="showPassword ? 'text' : 'password'" placeholder="Password" required class="focus:outline-none w-full bg-gray-100" />
+                <button type="button" @click="showPassword = !showPassword" class="inset-y-0 flex items-center justify-center h-full w-10 text-gray-500 hover:text-gray-700 focus:outline-none" aria-label="Toggle password visibility">
+                  <i class="fas" :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+                </button>
+              </div>
+              <small class="text-xs text-red-500">*Minimal 8 Karakter</small>
+            </div>
+            <div class="w-full flex flex-col mb-2">
+              <div class="flex w-full items-center justify-between bg-gray-100 border-none h-11 pl-4 pr-2 rounded-lg text-base focus-within:ring-2 focus-within:ring-blue-500">
+                <input id="retypepassword" v-model="retypepassword" :type="showConfirmationPassword ? 'text' : 'password'" placeholder="Confirmation Password" required class="focus:outline-none w-full bg-gray-100" />
+                <button
+                  type="button"
+                  @click="showConfirmationPassword = !showConfirmationPassword"
+                  class="inset-y-0 flex items-center justify-center h-full w-10 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  aria-label="Toggle password visibility"
+                >
+                  <i class="fas" :class="showConfirmationPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+                </button>
+              </div>
+              <small class="text-xs text-red-500">*Samakan dengan Password</small>
             </div>
             <Button
               type="submit"

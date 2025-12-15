@@ -22,14 +22,43 @@ export default {
     });
   },
 
+  updateForum(forumId, formData) {
+    return apiClient.post(`/forums/${forumId}/update`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+
+  deleteForum(forumId) {
+    return apiClient.post(`/forums/${forumId}/delete`);
+  },
+
   // Ambil jawaban (responds)
-  getResponds(slug, forumId) {
-    return apiClient.get(`/communities/${slug}/forums/${forumId}/responds`);
+  getResponds(slug, forumId, sort = "top", page = 1) {
+    return apiClient.get(`/communities/${slug}/forums/${forumId}/responds`, {
+      params: {
+        sort: sort,
+        page: page,
+      },
+    });
   },
 
   // Kirim jawaban
   createRespond(slug, forumId, formData) {
     return apiClient.post(`/communities/${slug}/forums/${forumId}/responds`, formData);
+  },
+
+  updateRespond(forumRespondId, formData) {
+    return apiClient.post(`/responds/${forumRespondId}/update`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+
+  deleteRespond(forumRespondId) {
+    return apiClient.post(`/responds/${forumRespondId}/delete`);
   },
 
   // Tandai solusi (Mark Accepted)
