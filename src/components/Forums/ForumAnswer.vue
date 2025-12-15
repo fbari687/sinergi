@@ -13,7 +13,13 @@ import { useReportModal } from "@/utils/useReportModal";
 
 const { openReport } = useReportModal();
 
-const props = defineProps(["answer", "isTopicOwner", "communitySlug", "forumId"]);
+const props = defineProps({
+  answer: Object,
+  isTopicOwner: Boolean,
+  communitySlug: String,
+  forumId: [String, Number],
+  isAdminView: { type: Boolean, default: false }, // Default false untuk user biasa
+});
 
 // Kita ubah emit: tidak lagi emit 'edit'/'delete' untuk aksi,
 // tapi emit 'refresh' agar parent tau data berubah.
@@ -207,18 +213,25 @@ const handleAccept = async () => {
 
 const menuItems = computed(() => {
   let items = [];
-  // 1. Pemilik Jawaban: Edit & Hapus (Panggil fungsi lokal)
-  if (isMe.value) {
-    items.push(
-      { label: "Edit Jawaban", icon: "fas fa-pen", command: openEditDialog }, // Panggil lokal
-      { label: "Hapus", icon: "fas fa-trash", class: "text-red-600", command: confirmDelete } // Panggil lokal
-    );
+
+  // LOGIKA ADMIN: Hapus saja
+  if (props.isAdminView) {
+    items.push({
+      label: "Hapus Jawaban (Admin)",
+      icon: "fas fa-trash",
+      class: "text-red-600 font-bold",
+      command: confirmDelete,
+    });
+    return items; // Admin selesai di sini
   }
-  // 2. Pemilik Topik: Tandai Solusi
+
+  // LOGIKA USER BIASA
+  if (isMe.value) {
+    items.push({ label: "Edit Jawaban", icon: "fas fa-pen", command: openEditDialog }, { label: "Hapus", icon: "fas fa-trash", class: "text-red-600", command: confirmDelete });
+  }
   if (props.isTopicOwner && !props.answer.is_accepted) {
     items.push({ label: "Jadikan Solusi", icon: "fas fa-check", class: "text-green-600", command: handleAccept });
   }
-  // 3. Orang Lain: Laporkan
   if (!isMe.value) {
     items.push({ label: "Laporkan", icon: "fas fa-flag", command: () => openReport("FORUM_RESPOND", props.answer?.id) });
   }
@@ -248,23 +261,29 @@ const getRoleColor = (role) => {
 <template>
   <div class="bg-white border rounded-xl p-5 flex gap-4 transition-all group" :class="answer.is_accepted ? 'border-green-500 shadow-sm bg-green-50/30' : 'border-gray-200'">
     <div class="flex flex-col items-center gap-1 min-w-10">
-      <button
-        @click="handleVote('up')"
-        class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 transition focus:outline-none cursor-pointer"
-        :class="localUserVote === 1 ? 'text-blue-600' : 'text-gray-400'"
-        :disabled="isVoting"
-      >
-        <i class="fa-solid fa-caret-up text-3xl transform translate-y-0.5"></i>
-      </button>
-      <span class="font-bold text-lg text-gray-700 select-none"><NumberFlow :value="localVoteCount" /></span>
-      <button
-        @click="handleVote('down')"
-        class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 transition focus:outline-none cursor-pointer"
-        :class="localUserVote === -1 ? 'text-blue-600' : 'text-gray-400'"
-        :disabled="isVoting"
-      >
-        <i class="fa-solid fa-caret-down text-3xl transform -translate-y-0.5"></i>
-      </button>
+      <template v-if="!isAdminView">
+        <button
+          @click="handleVote('up')"
+          class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 transition focus:outline-none cursor-pointer"
+          :class="localUserVote === 1 ? 'text-blue-600' : 'text-gray-400'"
+          :disabled="isVoting"
+        >
+          <i class="fa-solid fa-caret-up text-3xl transform translate-y-0.5"></i>
+        </button>
+        <span class="font-bold text-lg text-gray-700 select-none"><NumberFlow :value="localVoteCount" /></span>
+        <button
+          @click="handleVote('down')"
+          class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 transition focus:outline-none cursor-pointer"
+          :class="localUserVote === -1 ? 'text-blue-600' : 'text-gray-400'"
+          :disabled="isVoting"
+        >
+          <i class="fa-solid fa-caret-down text-3xl transform -translate-y-0.5"></i>
+        </button>
+      </template>
+      <template v-else>
+        <span class="font-bold text-lg text-gray-500 select-none"><NumberFlow :value="localVoteCount" /></span>
+        <span class="text-[10px] text-gray-400">Votes</span>
+      </template>
       <div v-if="answer.is_accepted" class="mt-3 text-green-600 flex flex-col items-center"><i class="fa-solid fa-check text-2xl"></i></div>
     </div>
 

@@ -7,6 +7,17 @@ export default {
   getRecommendedCommunities() {
     return apiClient.get("/communities/recommended");
   },
+  getAllCommunities(page = 1, limit = 10, search = "", sort = "newest") {
+    return apiClient.get("/communities/all", {
+      // Pastikan route backend '/communities/all' diarahkan ke CommunityController::getAllCommunities
+      params: {
+        page: page,
+        limit: limit,
+        q: search,
+        sort: sort,
+      },
+    });
+  },
   getCommunityDetail(slug) {
     return apiClient.get(`/communities/${slug}`);
   },
@@ -76,5 +87,20 @@ export default {
   // 4. Tolak Undangan
   declineInvitation(slug) {
     return apiClient.post(`/communities/${slug}/decline-invite`);
+  },
+
+  deleteCommunity(slug) {
+    return apiClient.post(`/communities/${slug}/delete`);
+  },
+
+  getDashboardMetrics(slug, period) {
+    return apiClient.get(`/communities/${slug}/dashboard`, {
+      params: { period: period }, // mengirim '7_days', '30_days', atau 'this_month'
+    });
+  },
+  getLeaderboard(slug, period) {
+    return apiClient.get(`/communities/${slug}/leaderboard`, {
+      params: { period },
+    });
   },
 };

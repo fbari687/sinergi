@@ -8,7 +8,15 @@ const authStore = useAuthStore();
 const route = useRoute();
 
 const showCommunityMenu = computed(() => {
-  return route.path.startsWith("/communities") && route.name !== "CommunityPosts" && route.name !== "CommunityForums" && route.name !== "CommunityMembers" && route.name !== "ForumDetail";
+  return (
+    route.path.startsWith("/communities") &&
+    route.name !== "CommunityPosts" &&
+    route.name !== "CommunityForums" &&
+    route.name !== "CommunityMembers" &&
+    route.name !== "ForumDetail" &&
+    route.name !== "CommunityDashboard" &&
+    route.name !== "CommunityLeaderboard"
+  );
 });
 
 const isInternal = computed(() => {

@@ -13,6 +13,7 @@ const props = defineProps({
     type: Boolean,
     required: true,
   },
+  isAdminView: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(["update:visible", "changeCommentCount", "toggleLike", "deletePost"]);
@@ -42,7 +43,7 @@ const handleDeletePost = (postId) => {
     :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
     :draggable="false"
   >
-    <PostDetailContent :post="post" @changeCommentCount="handleChangeCommentCount" @toggleLike="handleLike" @handleDelete="handleDeletePost" />
+    <PostDetailContent :post="post" :isAdminView="props.isAdminView" @changeCommentCount="handleChangeCommentCount" @toggleLike="handleLike" @handleDelete="handleDeletePost" />
   </Dialog>
 </template>
 

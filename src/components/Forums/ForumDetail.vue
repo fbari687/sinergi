@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from "vue";
 import { useAuthStore } from "@/store/auth";
-import { useToast } from "primevue";
+import { useConfirm, useToast } from "primevue";
 import NumberFlow from "@number-flow/vue";
 import Editor from "primevue/editor";
 import Dialog from "primevue/dialog";
@@ -24,6 +24,7 @@ const props = defineProps(["slug", "forumId"]);
 const router = useRouter();
 const authStore = useAuthStore();
 const toast = useToast();
+const confirm = useConfirm();
 
 // --- STATE DATA ---
 const forum = ref(null);
@@ -83,17 +84,7 @@ const forumMenuItems = computed(() => {
         label: "Hapus",
         icon: "fas fa-trash",
         class: "text-red-600",
-        command: async () => {
-          if (confirm("Yakin ingin menghapus topik ini?")) {
-            try {
-              await forumApi.deleteForum(props.slug, props.forumId);
-              toast.add({ severity: "success", summary: "Terhapus", detail: "Topik berhasil dihapus", life: 3000 });
-              router.replace(`/communities/${props.slug}/forums`);
-            } catch (e) {
-              toast.add({ severity: "error", summary: "Gagal", detail: "Gagal menghapus topik", life: 3000 });
-            }
-          }
-        },
+        command: async () => confirmDelete(),
       }
     );
   } else {
@@ -110,6 +101,37 @@ const forumMenuItems = computed(() => {
 const cleanContent = (htmlContent) => {
   if (!htmlContent) return "";
   return htmlContent.replace(/&nbsp;/g, " ");
+};
+
+const confirmDelete = () => {
+  confirm.require({
+    message: "Hapus pertanyaan ini?",
+    header: "Konfirmasi",
+    icon: "pi pi-info-circle",
+    rejectLabel: "Batal",
+    rejectProps: {
+      label: "Batal",
+      severity: "secondary",
+      outlined: true,
+    },
+    acceptProps: {
+      label: "Hapus",
+      severity: "danger",
+    },
+    accept: () => {
+      handleDelete();
+    },
+  });
+};
+
+const handleDelete = async () => {
+  try {
+    await forumApi.deleteForum(props.forumId);
+    toast.add({ severity: "success", summary: "Terhapus", detail: "Topik berhasil dihapus", life: 3000 });
+    router.replace(`/communities/${props.slug}/forums`);
+  } catch (e) {
+    toast.add({ severity: "error", summary: "Gagal", detail: "Gagal menghapus topik", life: 3000 });
+  }
 };
 
 const getRoleColor = (role) => {

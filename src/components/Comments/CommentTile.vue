@@ -26,6 +26,7 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  isAdminView: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(["deleteComment", "setReply"]);
@@ -211,7 +212,7 @@ const loadMoreReplies = () => {
       <!-- Popover Menu -->
       <div class="">
         <Popover ref="opPopover" class="bg-transparent border-none shadow-none p-0 z-10">
-          <template v-if="comment.user.id == authStore.user.id">
+          <template v-if="comment.user.id == authStore.user.id || isAdminView">
             <button type="button" @click="confirmDelete()" class="w-full cursor-pointer flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-gray-50"><i class="fas fa-trash w-4 text-center"></i> Hapus</button>
           </template>
           <template v-else>
@@ -228,7 +229,7 @@ const loadMoreReplies = () => {
          Level 1 ke atas (depth >= 1) tidak menambah margin lagi (flat). -->
     <div v-if="showReplies" class="flex flex-col gap-3 mt-3 transition-all duration-300" :class="depth === 0 ? 'ml-11 md:ml-14' : ''">
       <!-- Loop Balasan yang Terlihat -->
-      <CommentTile v-for="reply in visibleReplies" :key="reply.id" :comment="reply" :depth="depth + 1" @deleteComment="forwardDelete" @setReply="forwardReply" />
+      <CommentTile v-for="reply in visibleReplies" :key="reply.id" :comment="reply" :isAdminView="isAdminView" :depth="depth + 1" @deleteComment="forwardDelete" @setReply="forwardReply" />
 
       <!-- Tombol "Lihat balasan lainnya" -->
       <button v-if="hasMoreReplies" @click="loadMoreReplies" class="text-xs font-bold text-gray-500 hover:text-blue-600 self-start mt-1 cursor-pointer flex items-center gap-2">

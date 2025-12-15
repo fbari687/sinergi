@@ -13,6 +13,10 @@ export default {
     return apiClient.get(`/communities/${slug}/forums/${id}`);
   },
 
+  getForumById(id) {
+    return apiClient.get(`/forums/${id}`);
+  },
+
   // Buat topik baru
   createForum(slug, forumData) {
     return apiClient.post(`/communities/${slug}/forums`, forumData, {

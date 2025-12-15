@@ -24,6 +24,7 @@ const statusOptions = [
   { label: "Menunggu", value: "PENDING" },
   { label: "Disetujui", value: "APPROVED" },
   { label: "Ditolak", value: "REJECTED" },
+  { label: "Teraktivasi", value: "ACTIVATED" },
   { label: "Semua", value: "Semua" },
 ];
 
@@ -64,7 +65,8 @@ const stats = computed(() => {
   const pending = requests.value.filter((r) => r.status === "PENDING").length;
   const approved = requests.value.filter((r) => r.status === "APPROVED").length;
   const rejected = requests.value.filter((r) => r.status === "REJECTED").length;
-  return { total, pending, approved, rejected };
+  const activated = requests.value.filter((r) => r.status === "ACTIVATED").length;
+  return { total, pending, approved, rejected, activated };
 });
 
 const filteredRequests = computed(() => {
@@ -91,6 +93,8 @@ const getStatusBadgeClass = (status) => {
       return "bg-green-50 text-green-700 border-green-200";
     case "REJECTED":
       return "bg-red-50 text-red-700 border-red-200";
+    case "ACTIVATED":
+      return "bg-blue-50 text-blue-700 border-blue-200";
     default:
       return "bg-gray-100 text-gray-800 border-gray-200";
   }
@@ -218,7 +222,7 @@ const formatDateTime = (value) => {
       </div>
 
       <!-- KPI SUMMARY -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8">
         <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col">
           <span class="text-xs font-bold text-gray-400 uppercase tracking-wide">Total Request</span>
           <span class="text-2xl font-bold text-gray-900 mt-1">{{ stats.total }}</span>
@@ -235,6 +239,10 @@ const formatDateTime = (value) => {
           <span class="text-xs font-bold text-red-600 uppercase tracking-wide">Ditolak</span>
           <span class="text-2xl font-bold text-red-700 mt-1">{{ stats.rejected }}</span>
         </div>
+        <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 shadow-sm flex flex-col">
+          <span class="text-xs font-bold text-blue-600 uppercase tracking-wide">Teraktivasi</span>
+          <span class="text-2xl font-bold text-blue-700 mt-1">{{ stats.activated }}</span>
+        </div>
       </div>
 
       <!-- Main Content Card -->
@@ -247,7 +255,7 @@ const formatDateTime = (value) => {
               v-for="opt in statusOptions"
               :key="opt.value"
               @click="selectedStatus = opt.value"
-              class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-all duration-200"
+              class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-all duration-200 cursor-pointer"
               :class="selectedStatus === opt.value ? 'bg-blue-600 text-white border-blue-600 shadow-md' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'"
             >
               {{ opt.label }}
@@ -338,11 +346,11 @@ const formatDateTime = (value) => {
                   <button
                     v-if="req.status === 'PENDING'"
                     @click="openReviewDialog(req)"
-                    class="inline-flex items-center gap-1 font-bold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg text-xs transition-all shadow-sm hover:shadow-md"
+                    class="inline-flex items-center gap-1 font-bold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg text-xs transition-all shadow-sm hover:shadow-md cursor-pointer"
                   >
                     <i class="fas fa-eye"></i> Verifikasi
                   </button>
-                  <button v-else @click="openReviewDialog(req)" class="inline-flex items-center gap-1 font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg text-xs transition-colors">
+                  <button v-else @click="openReviewDialog(req)" class="inline-flex items-center gap-1 font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg text-xs transition-colors cursor-pointer">
                     <i class="fas fa-file-alt"></i> Detail
                   </button>
                 </td>
@@ -481,8 +489,8 @@ const formatDateTime = (value) => {
                 placeholder="Tulis alasan mengapa permintaan ini ditolak (akan dikirim ke email pemohon)..."
               ></textarea>
               <div class="flex justify-end mt-3 gap-2">
-                <button @click="showRejectInput = false" class="px-3 py-1.5 text-xs font-bold text-gray-600 hover:text-gray-800">Batal</button>
-                <button @click="handleReject" :disabled="isProcessing" class="px-4 py-1.5 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 shadow-sm transition-colors">
+                <button @click="showRejectInput = false" class="px-3 py-1.5 text-xs font-bold text-gray-600 hover:text-gray-800 cursor-pointer">Batal</button>
+                <button @click="handleReject" :disabled="isProcessing" class="px-4 py-1.5 bg-red-600 text-white rounded-lg text-xs font-bold hover:bg-red-700 shadow-sm transition-colors cursor-pointer">
                   <i v-if="isProcessing" class="fa-solid fa-spinner fa-spin mr-1"></i>
                   Kirim Penolakan
                 </button>
@@ -494,14 +502,14 @@ const formatDateTime = (value) => {
         <template #footer>
           <!-- Footer hanya muncul jika status PENDING dan sedang tidak input reject -->
           <div v-if="selectedRequest?.status === 'PENDING' && !showRejectInput" class="flex justify-between items-center w-full px-6 py-4 bg-gray-50 rounded-b-xl border-t border-gray-100">
-            <button @click="showDetailDialog = false" class="text-gray-500 hover:text-gray-700 text-sm font-semibold transition-colors">Tutup</button>
+            <button @click="showDetailDialog = false" class="text-gray-500 hover:text-gray-700 text-sm font-semibold transition-colors cursor-pointer">Tutup</button>
 
             <div class="flex gap-3">
-              <button @click="showRejectInput = true" class="px-4 py-2 text-red-600 border border-red-200 hover:bg-red-50 rounded-lg text-sm font-bold transition-colors">Tolak</button>
+              <button @click="showRejectInput = true" class="px-4 py-2 text-red-600 border border-red-200 hover:bg-red-50 rounded-lg text-sm font-bold transition-colors cursor-pointer">Tolak</button>
               <button
                 @click="handleApprove"
                 :disabled="isProcessing"
-                class="px-5 py-2 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed rounded-lg text-sm font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2"
+                class="px-5 py-2 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed rounded-lg text-sm font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer"
               >
                 <i v-if="isProcessing" class="fa-solid fa-spinner fa-spin"></i>
                 <i v-else class="fa-solid fa-check"></i>
@@ -512,7 +520,7 @@ const formatDateTime = (value) => {
 
           <!-- Tombol Tutup Sederhana jika bukan PENDING -->
           <div v-else-if="selectedRequest?.status !== 'PENDING'" class="flex justify-end w-full px-6 py-4 bg-gray-50 rounded-b-xl border-t border-gray-100">
-            <button @click="showDetailDialog = false" class="px-5 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-bold shadow-sm transition-colors">Tutup</button>
+            <button @click="showDetailDialog = false" class="px-5 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg text-sm font-bold shadow-sm transition-colors cursor-pointer">Tutup</button>
           </div>
         </template>
       </Dialog>

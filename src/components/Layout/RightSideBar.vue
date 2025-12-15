@@ -35,7 +35,7 @@ onMounted(loadCommunities);
           <p>Belum mengikuti komunitas.</p>
         </template>
         <template v-else>
-          <CommunityTile v-for="community in communities" :community="community" />
+          <CommunityTile v-for="community in communities" :key="community.slug" :community="community" />
         </template>
       </template>
     </div>

@@ -151,7 +151,7 @@ watch(
               <RouterLink to="/communities/joined" class="text-sm sm:text-base text-blue-500 hover:text-blue-600 font-medium transition-colors">Lihat Semua</RouterLink>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-4 sm:gap-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
               <template v-if="loadingJoined">
                 <CommunityCardSkeleton v-for="n in 3" :key="n" />
               </template>

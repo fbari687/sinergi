@@ -327,8 +327,8 @@ onUnmounted(() => {
           </div>
         </div>
         <template #footer>
-          <button @click="showCreateDialog = false" class="px-4 py-2 text-gray-600 font-bold hover:bg-gray-100 rounded-lg">Batal</button>
-          <button @click="handleCreateTopic" :disabled="isSubmitting" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2">
+          <button @click="showCreateDialog = false" class="px-4 py-2 text-gray-600 font-bold hover:bg-gray-100 rounded-lg cursor-pointer">Batal</button>
+          <button @click="handleCreateTopic" :disabled="isSubmitting" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2 cursor-pointer">
             <i v-if="isSubmitting" class="fa-solid fa-circle-notch fa-spin"></i>
             <span>{{ isSubmitting ? "Mengirim..." : "Kirim Pertanyaan" }}</span>
           </button>

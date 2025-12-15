@@ -14,10 +14,12 @@ const route = useRoute();
           <!-- Menu Items -->
           <li
             v-for="(item, index) in [
-              { name: 'Dashboard', icon: 'fa-home', link: '/admin/dashboard', active: true },
-              { name: 'Pengguna', icon: 'fa-users', link: '/admin/users', active: false },
-              { name: 'Permintaan Akun', icon: 'fa-user-plus', link: '/admin/accounts', active: false },
-              { name: 'Laporan', icon: 'fa-flag', link: '/admin/reports', active: false },
+              { name: 'Dashboard', icon: 'fa-home', link: '/admin/dashboard' },
+              { name: 'Pengguna', icon: 'fa-users', link: '/admin/users' },
+              { name: 'Permintaan Akun', icon: 'fa-user-plus', link: '/admin/accounts' },
+              { name: 'Kelola Home', icon: 'fa-house-user', link: '/admin/home' },
+              { name: 'Kelola Komunitas', icon: 'fa-user-group', link: '/admin/communities' },
+              { name: 'Laporan', icon: 'fa-flag', link: '/admin/reports' },
             ]"
             :key="index"
             class="order-1 md:order-0"
@@ -28,7 +30,7 @@ const route = useRoute();
               :class="route.path == `${item.link}` ? 'text-blue-600 bg-blue-50 md:bg-white md:text-blue-600 md:shadow-sm' : 'text-gray-600 md:text-white hover:bg-gray-50 md:hover:bg-white/20 md:hover:text-white'"
             >
               <i class="fas text-xl mb-1 md:mb-0 md:w-6 md:mr-4 md:text-xl" :class="item.icon"></i>
-              <span>{{ item.name }}</span>
+              <span class="text-center sm:text-start">{{ item.name }}</span>
             </RouterLink>
           </li>
         </ul>

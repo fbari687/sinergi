@@ -19,6 +19,7 @@ const props = defineProps({
     type: Boolean,
     default: true, // Default true agar aman jika dipakai di tempat lain
   },
+  isAdminView: { type: Boolean, default: false },
 });
 
 const router = useRouter();
@@ -52,6 +53,10 @@ const cleanDescription = computed(() => {
 
 // Handle navigasi
 const handleClick = () => {
+  if (props.isAdminView) {
+    router.push(`/admin/communities/${props.communitySlug}/forums/${props.forum.id}`);
+    return;
+  }
   if (!props.isMember) {
     toast.add({
       severity: "info",

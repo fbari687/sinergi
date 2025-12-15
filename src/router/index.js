@@ -23,6 +23,14 @@ import ActivateAccountPage from "@/views/Auth/ActivateAccountPage.vue";
 import LandingPage from "@/views/LandingPage.vue";
 import CommunityDashboardPage from "@/views/CommunityDashboardPage.vue";
 import ForgotPasswordPage from "@/views/ForgotPasswordPage.vue";
+import AdminHomePage from "@/views/Admins/AdminHomePage.vue";
+import AdminCommunitiesPage from "@/views/Admins/AdminCommunitiesPage.vue";
+import AdminCommunityWrapper from "@/views/Admins/AdminCommunityWrapper.vue";
+import AdminCommunityPosts from "@/views/Admins/AdminCommunityPosts.vue";
+import AdminCommunityForums from "@/views/Admins/AdminCommunityForums.vue";
+import AdminCommunityMembers from "@/views/Admins/AdminCommunityMembers.vue";
+import AdminForumDetail from "@/views/Admins/AdminForumDetail.vue";
+import CommunityLeaderboardPage from "@/views/CommunityLeaderboardPage.vue";
 
 const allRoles = ["Admin", "Dosen", "Mahasiswa", "Alumni", "Mitra", "Pakar"];
 const internalRoles = ["Admin", "Dosen", "Mahasiswa"];
@@ -130,6 +138,11 @@ const routes = [
         name: "CommunityDashboard",
         component: CommunityDashboardPage,
       },
+      {
+        path: "leaderboard",
+        name: "CommunityLeaderboard",
+        component: CommunityLeaderboardPage,
+      },
     ],
     meta: {
       roles: allRoles,
@@ -153,18 +166,18 @@ const routes = [
     },
   },
   {
+    path: "/activate-account",
+    name: "activate-account",
+    component: ActivateAccountPage,
+    meta: { publicOnly: true },
+  },
+  {
     path: "/admin/dashboard",
     name: "AdminDashboard",
     component: DashboardPage,
     meta: {
       roles: ["Admin"],
     },
-  },
-  {
-    path: "/activate-account",
-    name: "activate-account",
-    component: ActivateAccountPage,
-    meta: { publicOnly: true },
   },
   {
     path: "/admin/users",
@@ -181,6 +194,58 @@ const routes = [
     meta: {
       roles: ["Admin"],
     },
+  },
+  {
+    path: "/admin/home",
+    name: "AdminHomePage",
+    component: AdminHomePage,
+    meta: {
+      roles: ["Admin"],
+    },
+  },
+  {
+    path: "/admin/communities",
+    name: "AdminCommunitiesPage",
+    component: AdminCommunitiesPage,
+    meta: {
+      roles: ["Admin"],
+    },
+  },
+  {
+    path: "/admin/communities/:slug",
+    component: AdminCommunityWrapper, // Wrapper Baru
+    children: [
+      {
+        path: "", // Default ke Posts
+        name: "AdminCommunityPosts",
+        component: AdminCommunityPosts,
+      },
+      {
+        path: "forums",
+        name: "AdminCommunityForums",
+        component: AdminCommunityForums,
+      },
+      {
+        path: "members",
+        name: "AdminCommunityMembers",
+        component: AdminCommunityMembers,
+      },
+      {
+        path: "dashboard",
+        name: "AdminCommunityDashboard",
+        component: CommunityDashboardPage, // Reuse Dashboard User
+      },
+    ],
+    meta: {
+      roles: ["Admin"],
+    },
+  },
+  {
+    path: "/admin/communities/:slug/forums/:forumId",
+    name: "AdminForumDetail",
+    component: AdminForumDetail,
+    props: true,
+    meta: { roles: ["Admin"] }, // Sesuaikan dengan guard Anda
   },
   {
     path: "/admin/reports",

@@ -19,6 +19,7 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  isAdminView: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(["changeCommentCount", "toggleLike", "handleDelete"]);
@@ -186,7 +187,7 @@ onMounted(loadComments);
             </RouterLink>
             <p class="text-xs text-gray-500 mt-1 m-0">{{ post.is_edited ? formatIndonesianDate(post.created_at) + ` (Telah disunting ${formatTimeAgo(post.updated_at)})` : formatTimeAgo(post.created_at) }}</p>
           </div>
-          <PostOptionsPopover :post="post" @deletePost="deletePost" />
+          <PostOptionsPopover :post="post" @deletePost="deletePost" :isAdminView="isAdminView" />
         </div>
 
         <div class="pt-2 text-sm leading-relaxed">
@@ -198,7 +199,7 @@ onMounted(loadComments);
           </template>
         </div>
 
-        <div class="flex justify-around px-4 py-2 border-t border-b mt-4">
+        <div v-if="!isAdminView" class="flex justify-around px-4 py-2 border-t border-b mt-4">
           <button @click="handleLike" type="button" class="w-20 bg-transparent border-none cursor-pointer text-sm text-gray-600 flex gap-2 items-center justify-center group">
             <i :class="post.is_liked_by_user ? 'fa-solid fa-heart text-lg text-pink-600' : 'fa-regular fa-heart text-lg text-gray-600'"></i>
             <span class="w-10 text-start"><NumberFlow :value="post.like_count" /></span>
@@ -209,6 +210,7 @@ onMounted(loadComments);
             <span class="w-10 text-start"><NumberFlow :value="currentCommentCount" /></span>
           </button>
         </div>
+        <div v-if="isAdminView" class="px-4 py-2 border-b"></div>
       </div>
 
       <div class="space-y-4">
@@ -222,13 +224,13 @@ onMounted(loadComments);
             <p class="text-gray-500 text-sm italic">Belum ada komentar.</p>
           </template>
           <template v-else>
-            <CommentTile v-for="comment in comments" :key="comment.id" :comment="comment" @deleteComment="handleDeleteComment" @setReply="handleSetReply" />
+            <CommentTile v-for="comment in comments" :key="comment.id" :comment="comment" :isAdminView="isAdminView" @deleteComment="handleDeleteComment" @setReply="handleSetReply" />
           </template>
         </template>
       </div>
     </div>
 
-    <div class="fixed left-0 w-full bottom-0 z-20 flex items-center justify-center">
+    <div class="fixed left-0 w-full bottom-0 z-20 flex items-center justify-center" v-if="!isAdminView">
       <div class="block w-full lg:max-w-[690px] bg-white border-t">
         <div v-if="replyingTo" class="px-4 py-2 bg-gray-100 flex justify-between items-center text-sm border-b">
           <span class="text-gray-600">

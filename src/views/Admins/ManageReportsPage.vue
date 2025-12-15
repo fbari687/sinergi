@@ -6,9 +6,13 @@ import Dialog from "primevue/dialog";
 import Paginator from "primevue/paginator";
 import reportApi from "@/services/reportApi";
 
-// --- IMPORT BARU: Component Dialog Postingan ---
+// --- IMPORT POST (YANG SUDAH ADA) ---
 import postApi from "@/services/postApi";
 import PostReadOnlyContent from "@/components/Posts/PostReadOnlyContent.vue";
+
+// --- IMPORT BARU: FORUM ---
+import forumApi from "@/services/forumApi"; // Pastikan service ini ada
+import ForumReadOnlyContent from "@/components/Forums/ForumReadOnlyContent.vue";
 
 const toast = useToast();
 
@@ -31,10 +35,15 @@ const detailReports = ref([]);
 const detailTarget = ref(null);
 const isActionLoading = ref(false);
 
-// --- STATE BARU: Untuk Dialog Full Post ---
+// --- STATE: Dialog Full Post ---
 const showPostDialog = ref(false);
 const isFetchingPost = ref(false);
 const fullPostData = ref(null);
+
+// --- STATE BARU: Dialog Full Forum ---
+const showForumDialog = ref(false);
+const isFetchingForum = ref(false);
+const fullForumData = ref(null);
 
 const statusOptions = [
   { label: "Open", value: "OPEN" },
@@ -152,58 +161,50 @@ const openDetail = async (summaryItem) => {
   }
 };
 
-// --- FUNGSI BARU: Membuka Dialog Postingan Penuh ---
+// --- FUNGSI: Buka Dialog POST ---
 const openFullPostContent = async () => {
-  // Pastikan kita punya ID postingan
-  // reportable_id dari selectedSummary adalah ID postingan tersebut
   const postId = selectedSummary.value?.reportable_id;
-
   if (!postId) {
     toast.add({ severity: "warn", summary: "Error", detail: "ID Postingan tidak ditemukan", life: 3000 });
     return;
   }
 
   isFetchingPost.value = true;
-
   try {
-    // 1. Request data lengkap postingan dari API
     const response = await postApi.getPostById(postId);
-
-    // 2. Masukkan data lengkap ke state
     fullPostData.value = response.data.data;
-
-    // 3. Baru buka dialognya
     showPostDialog.value = true;
   } catch (err) {
     console.error("Gagal memuat postingan:", err);
-    toast.add({
-      severity: "error",
-      summary: "Gagal",
-      detail: "Postingan mungkin sudah dihapus atau tidak ditemukan.",
-      life: 3000,
-    });
+    toast.add({ severity: "error", summary: "Gagal", detail: "Postingan tidak ditemukan.", life: 3000 });
   } finally {
     isFetchingPost.value = false;
   }
 };
 
-// --- FUNGSI DUMMY: Menghandle event dari PostCommentDialog agar tidak error ---
-// (Opsional: Admin mungkin tidak perlu like, tapi perlu handle delete)
-const handleAdminLike = (postId) => {
-  console.log("Admin liked post:", postId);
-  // Implementasi like jika admin boleh like, atau biarkan kosong
-};
-
-const handleAdminCommentCount = (postId, count) => {
-  if (fullPostData.value && fullPostData.value.id === postId) {
-    fullPostData.value.comment_count = count;
+// --- FUNGSI BARU: Buka Dialog FORUM ---
+const openFullForumContent = async () => {
+  const forumId = selectedSummary.value?.reportable_id;
+  if (!forumId) {
+    toast.add({ severity: "warn", summary: "Error", detail: "ID Forum tidak ditemukan", life: 3000 });
+    return;
   }
-};
 
-const handleAdminDeletePost = async (postId) => {
-  // Gunakan fungsi deleteContent yang sudah ada
-  await deleteContent();
-  showPostDialog.value = false; // Tutup dialog post setelah delete
+  isFetchingForum.value = true;
+  try {
+    // ASUMSI: Anda memiliki endpoint untuk getForumById.
+    // Jika endpoint forumApi.getForumDetail butuh slug, Anda mungkin perlu endpoint khusus admin getById
+    // atau gunakan endpoint detail yang sudah ada jika support ID saja.
+    const response = await forumApi.getForumById(forumId);
+
+    fullForumData.value = response.data.data;
+    showForumDialog.value = true;
+  } catch (err) {
+    console.error("Gagal memuat forum:", err);
+    toast.add({ severity: "error", summary: "Gagal", detail: "Forum tidak ditemukan atau sudah dihapus.", life: 3000 });
+  } finally {
+    isFetchingForum.value = false;
+  }
 };
 
 const applyStatus = async (status) => {
@@ -211,22 +212,12 @@ const applyStatus = async (status) => {
   isActionLoading.value = true;
   try {
     await reportApi.updateStatus(selectedSummary.value.reportable_type, selectedSummary.value.reportable_id, status);
-    toast.add({
-      severity: "success",
-      summary: "Berhasil",
-      detail: "Status laporan diperbarui.",
-      life: 3000,
-    });
+    toast.add({ severity: "success", summary: "Berhasil", detail: "Status laporan diperbarui.", life: 3000 });
     showDetailDialog.value = false;
     fetchReports();
   } catch (err) {
     console.error(err);
-    toast.add({
-      severity: "error",
-      summary: "Gagal",
-      detail: err.response?.data?.meta?.message || "Gagal memperbarui status.",
-      life: 4000,
-    });
+    toast.add({ severity: "error", summary: "Gagal", detail: "Gagal memperbarui status.", life: 4000 });
   } finally {
     isActionLoading.value = false;
   }
@@ -234,29 +225,23 @@ const applyStatus = async (status) => {
 
 const deleteContent = async () => {
   if (!selectedSummary.value) return;
-  if (!confirm("Yakin ingin menghapus / menonaktifkan konten ini? Tindakan ini tidak dapat dibatalkan.")) {
+  if (!confirm("Yakin ingin menghapus konten ini? Tindakan ini tidak dapat dibatalkan.")) {
     return;
   }
 
   isActionLoading.value = true;
   try {
     await reportApi.deleteTarget(selectedSummary.value.reportable_type, selectedSummary.value.reportable_id);
-    toast.add({
-      severity: "success",
-      summary: "Konten dihapus",
-      detail: "Konten telah dihapus/dinonaktifkan dan laporan ditandai selesai.",
-      life: 4000,
-    });
+    toast.add({ severity: "success", summary: "Konten dihapus", detail: "Konten telah dihapus dan laporan selesai.", life: 4000 });
+
     showDetailDialog.value = false;
+    showPostDialog.value = false;
+    showForumDialog.value = false; // Tutup dialog forum juga
+
     fetchReports();
   } catch (err) {
     console.error(err);
-    toast.add({
-      severity: "error",
-      summary: "Gagal",
-      detail: err.response?.data?.meta?.message || "Gagal menghapus konten.",
-      life: 4000,
-    });
+    toast.add({ severity: "error", summary: "Gagal", detail: "Gagal menghapus konten.", life: 4000 });
   } finally {
     isActionLoading.value = false;
   }
@@ -336,7 +321,6 @@ const deleteContent = async () => {
                         <i class="fa-solid fa-image"></i>
                       </div>
                     </div>
-
                     <div class="flex flex-col">
                       <span class="text-[10px] font-bold uppercase tracking-wide text-blue-600 mb-0.5">
                         {{ item.target_preview?.type_label || item.reportable_type }}
@@ -347,20 +331,15 @@ const deleteContent = async () => {
                     </div>
                   </div>
                 </td>
-
                 <td class="px-6 py-4 text-center">
-                  <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-800 font-bold text-sm border border-gray-200">
-                    {{ item.total_reports }}
-                  </span>
+                  <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-800 font-bold text-sm border border-gray-200">{{ item.total_reports }}</span>
                 </td>
-
                 <td class="px-6 py-4 text-xs text-gray-500 whitespace-nowrap font-medium">
                   <div class="flex items-center gap-2">
                     <i class="fa-regular fa-clock"></i>
                     {{ formatDateTime(item.last_report_at) }}
                   </div>
                 </td>
-
                 <td class="px-6 py-4">
                   <span class="inline-flex items-center px-3 py-1 text-xs font-bold rounded-full border shadow-sm" :class="statusBadgeClass(item.status)">
                     <i
@@ -370,18 +349,15 @@ const deleteContent = async () => {
                     {{ item.status }}
                   </span>
                 </td>
-
                 <td class="px-6 py-4 text-center">
                   <button
                     class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 hover:text-blue-800 rounded-lg transition-all shadow-sm border border-blue-100"
                     @click="openDetail(item)"
                   >
-                    <i class="fas fa-eye"></i>
-                    Tinjau
+                    <i class="fas fa-eye"></i> Tinjau
                   </button>
                 </td>
               </tr>
-
               <tr v-if="!filteredReports.length && !loading">
                 <td colspan="5" class="px-6 py-16 text-center">
                   <div class="flex flex-col items-center gap-4 text-gray-400">
@@ -395,7 +371,6 @@ const deleteContent = async () => {
               </tr>
             </tbody>
           </table>
-
           <div class="border-t border-gray-100 px-4 py-3 bg-gray-50/50 flex justify-end">
             <Paginator :rows="perPage" :totalRecords="total" :first="(page - 1) * perPage" :rowsPerPageOptions="[5, 10, 20, 50]" @page="onPageChange" />
           </div>
@@ -408,11 +383,7 @@ const deleteContent = async () => {
         :style="{ width: '700px' }"
         header="Detail Laporan Konten"
         :draggable="false"
-        :pt="{
-          root: { class: 'rounded-xl shadow-2xl border-0' },
-          header: { class: 'bg-white border-b border-gray-100 pb-3 rounded-t-xl' },
-          content: { class: 'p-0' },
-        }"
+        :pt="{ root: { class: 'rounded-xl shadow-2xl border-0' }, header: { class: 'bg-white border-b border-gray-100 pb-3 rounded-t-xl' }, content: { class: 'p-0' } }"
       >
         <div class="p-6">
           <div v-if="detailLoading" class="py-12 text-center text-gray-400 flex flex-col items-center justify-center">
@@ -423,14 +394,12 @@ const deleteContent = async () => {
           <div v-else-if="detailTarget" class="flex flex-col gap-6">
             <div class="bg-linear-to-r from-gray-50 to-white border border-gray-200 rounded-xl p-5 flex gap-5 items-start shadow-sm relative overflow-hidden">
               <div class="absolute top-0 right-0 w-20 h-20 bg-gray-100 rounded-bl-full opacity-50 -mr-10 -mt-10"></div>
-
               <div class="shrink-0 relative z-10">
                 <img v-if="detailTarget?.thumbnail" :src="detailTarget.thumbnail" alt="target-image" class="w-20 h-20 rounded-xl object-cover border border-white shadow-md" />
                 <div v-else class="w-20 h-20 rounded-xl bg-gray-200 flex items-center justify-center border border-white shadow-md text-gray-400">
                   <i class="fa-solid fa-image text-2xl"></i>
                 </div>
               </div>
-
               <div class="flex-1 flex flex-col justify-center z-10">
                 <div class="flex justify-between items-start">
                   <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700 mb-1">
@@ -440,68 +409,54 @@ const deleteContent = async () => {
                     <span class="text-xs text-gray-500">ID: {{ selectedSummary?.reportable_id }}</span>
                   </div>
                 </div>
-
                 <h3 class="text-lg font-bold text-gray-900 leading-snug line-clamp-2">
                   {{ detailTarget.label || "Konten Tidak Tersedia" }}
                 </h3>
-
                 <div class="mt-2 flex items-center gap-2">
                   <span class="text-xs font-semibold text-gray-500">Total Laporan:</span>
-                  <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-md bg-red-100 text-red-700 text-xs font-bold">
-                    {{ selectedSummary?.total_reports }}
-                  </span>
+                  <span class="inline-flex items-center justify-center px-2 py-0.5 rounded-md bg-red-100 text-red-700 text-xs font-bold">{{ selectedSummary?.total_reports }}</span>
                 </div>
 
                 <div v-if="detailTarget.type_label === 'Post' || selectedSummary?.reportable_type === 'Post'" class="mt-3">
                   <button @click="openFullPostContent" :disabled="isFetchingPost" class="text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50 disabled:cursor-wait">
                     <i v-if="isFetchingPost" class="fa-solid fa-circle-notch fa-spin"></i>
                     <i v-else class="fa-solid fa-external-link-alt"></i>
-
                     <span>{{ isFetchingPost ? "Memuat Postingan..." : "Lihat Postingan Lengkap" }}</span>
+                  </button>
+                </div>
+
+                <div v-if="detailTarget.type_label === 'FORUM' || selectedSummary?.reportable_type === 'FORUM'" class="mt-3">
+                  <button @click="openFullForumContent" :disabled="isFetchingForum" class="text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50 disabled:cursor-wait">
+                    <i v-if="isFetchingForum" class="fa-solid fa-circle-notch fa-spin"></i>
+                    <i v-else class="fa-solid fa-external-link-alt"></i>
+                    <span>{{ isFetchingForum ? "Memuat Forum..." : "Lihat Forum Lengkap" }}</span>
                   </button>
                 </div>
               </div>
             </div>
 
             <div>
-              <h4 class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-list-ul text-gray-400"></i>
-                Daftar Pelapor
-              </h4>
+              <h4 class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2"><i class="fa-solid fa-list-ul text-gray-400"></i> Daftar Pelapor</h4>
               <div class="max-h-72 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
                 <div v-for="r in detailReports" :key="r.id" class="border border-gray-200 rounded-xl p-4 bg-white hover:border-blue-300 hover:shadow-sm transition-all">
                   <div class="flex justify-between items-start mb-2">
                     <div class="flex items-center gap-2">
-                      <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-xs">
-                        <i class="fa-solid fa-user"></i>
-                      </div>
+                      <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-xs"><i class="fa-solid fa-user"></i></div>
                       <div>
-                        <p class="text-sm font-bold text-gray-800 leading-none">
-                          {{ r.fullname }}
-                        </p>
+                        <p class="text-sm font-bold text-gray-800 leading-none">{{ r.fullname }}</p>
                         <p class="text-[10px] text-gray-500">@{{ r.username }}</p>
                       </div>
                     </div>
-                    <span class="text-[10px] px-2 py-1 rounded-md bg-red-50 text-red-700 font-bold border border-red-100">
-                      {{ r.violation_type }}
-                    </span>
+                    <span class="text-[10px] px-2 py-1 rounded-md bg-red-50 text-red-700 font-bold border border-red-100">{{ r.violation_type }}</span>
                   </div>
-
                   <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 text-sm text-gray-700 relative">
                     <i class="fa-solid fa-quote-left absolute top-2 left-2 text-gray-200 text-xl z-0"></i>
-                    <p class="relative z-10 whitespace-pre-line pl-1">
-                      {{ r.reason || "Tidak ada keterangan tambahan." }}
-                    </p>
+                    <p class="relative z-10 whitespace-pre-line pl-1">{{ r.reason || "Tidak ada keterangan tambahan." }}</p>
                   </div>
-
                   <div class="mt-2 text-right">
-                    <span class="text-[10px] text-gray-400">
-                      <i class="fa-regular fa-calendar mr-1"></i>
-                      {{ formatDateTime(r.created_at) }}
-                    </span>
+                    <span class="text-[10px] text-gray-400"><i class="fa-regular fa-calendar mr-1"></i> {{ formatDateTime(r.created_at) }}</span>
                   </div>
                 </div>
-
                 <div v-if="!detailReports.length" class="text-center py-8 border-2 border-dashed border-gray-200 rounded-xl">
                   <p class="text-sm text-gray-400">Data detail laporan tidak ditemukan.</p>
                 </div>
@@ -519,11 +474,9 @@ const deleteContent = async () => {
                     'text-green-600': selectedSummary?.status === 'RESOLVED',
                     'text-gray-600': selectedSummary?.status === 'IGNORED',
                   }"
+                  >{{ selectedSummary?.status }}</span
                 >
-                  {{ selectedSummary?.status }}
-                </span>
               </div>
-
               <div class="flex flex-wrap gap-2 justify-end">
                 <button
                   @click="applyStatus('IGNORED')"
@@ -552,8 +505,7 @@ const deleteContent = async () => {
                   :disabled="isActionLoading"
                   class="px-4 py-2 text-xs rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-bold flex items-center justify-center bg-red-600 text-white hover:bg-red-700 shadow-md hover:shadow-lg border border-transparent"
                 >
-                  <i v-if="isActionLoading" class="fa-solid fa-spinner fa-spin mr-1"></i>
-                  Hapus Konten
+                  <i v-if="isActionLoading" class="fa-solid fa-spinner fa-spin mr-1"></i> Hapus Konten
                 </button>
               </div>
             </div>
@@ -573,11 +525,9 @@ const deleteContent = async () => {
         <div v-if="fullPostData" class="p-1">
           <PostReadOnlyContent :post="fullPostData" />
         </div>
-
         <template #footer>
           <div class="flex justify-end gap-2 pt-2">
             <button @click="showPostDialog = false" class="px-4 py-2 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Tutup</button>
-
             <button
               @click="
                 deleteContent();
@@ -590,12 +540,32 @@ const deleteContent = async () => {
           </div>
         </template>
       </Dialog>
+
+      <Dialog v-model:visible="showForumDialog" modal :header="'Tinjauan Forum Diskusi'" :style="{ width: '800px' }" :breakpoints="{ '1199px': '85vw', '575px': '95vw' }" :draggable="false" dismissableMask>
+        <div v-if="fullForumData" class="p-1">
+          <ForumReadOnlyContent :forum="fullForumData" />
+        </div>
+        <template #footer>
+          <div class="flex justify-end gap-2 pt-2">
+            <button @click="showForumDialog = false" class="px-4 py-2 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Tutup</button>
+            <button
+              @click="
+                deleteContent();
+                showForumDialog = false;
+              "
+              class="px-4 py-2 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow-sm"
+            >
+              Hapus Topik Ini
+            </button>
+          </div>
+        </template>
+      </Dialog>
     </div>
   </LayoutAdminUser>
 </template>
 
 <style scoped>
-/* Custom Scrollbar untuk List Reports */
+/* (STYLE SAMA SEPERTI SEBELUMNYA) */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
@@ -610,8 +580,6 @@ const deleteContent = async () => {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
 }
-
-/* Override PrimeVue Paginator look to match layout */
 :deep(.p-paginator) {
   background-color: transparent !important;
   padding: 0 !important;
