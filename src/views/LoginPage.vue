@@ -34,20 +34,28 @@ const login = async () => {
 
   try {
     // 1. Lakukan Login
-    // handleLogin di auth.js mengembalikan data user dan TIDAK redirect otomatis
     const userData = await authStore.handleLogin({
       email: email.value,
       password: password.value,
       captcha_code: captcha_code.value,
     });
 
-    // 2. Cek apakah Profile sudah lengkap
-    // Property is_profile_complete dikirim dari Backend
+    // --- LOGIKA BARU: LIFECYCLE CHECK ---
+    const currentYear = new Date().getFullYear();
+
+    // Cek jika Role Mahasiswa DAN Tahun sekarang > Tahun Perkiraan Lulus
+    // Pastikan userData.tahun_perkiraan_lulus tersedia (konversi ke int jika string)
+    if (userData.role === "Mahasiswa" && userData.tahun_perkiraan_lulus && currentYear > parseInt(userData.tahun_perkiraan_lulus)) {
+      // Redirect ke halaman status akun
+      router.push("/account-status");
+      return; // Stop eksekusi agar tidak lanjut ke dashboard
+    }
+    // -------------------------------------
+
+    // 2. Cek apakah Profile sudah lengkap (Logika Lama)
     if (userData && userData.is_profile_complete === false) {
-      // JIKA BELUM: Tampilkan Dialog (User tetap di halaman Login)
       showProfileDialog.value = true;
     } else {
-      // JIKA SUDAH: Redirect ke Dashboard
       router.push("/");
     }
   } catch (err) {

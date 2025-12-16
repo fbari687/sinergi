@@ -32,6 +32,7 @@ import AdminCommunityMembers from "@/views/Admins/AdminCommunityMembers.vue";
 import AdminForumDetail from "@/views/Admins/AdminForumDetail.vue";
 import CommunityLeaderboardPage from "@/views/CommunityLeaderboardPage.vue";
 import AdminLeaderboardPage from "@/views/Admins/AdminLeaderboardPage.vue";
+import AccountStatusPage from "@/views/AccountStatusPage.vue";
 
 const allRoles = ["Admin", "Dosen", "Mahasiswa", "Alumni", "Mitra", "Pakar"];
 const internalRoles = ["Dosen", "Mahasiswa"];
@@ -66,6 +67,14 @@ const routes = [
     meta: {
       publicOnly: true,
     },
+  },
+  {
+    path: "/account-status",
+    name: "AccountStatus",
+    component: AccountStatusPage,
+    meta: {
+      roles: ["Mahasiswa"],
+    }, // Pastikan user harus login dulu (token ada)
   },
   {
     path: "/register",
@@ -283,6 +292,34 @@ router.beforeEach(async (to, from, next) => {
 
   const isLoggedIn = !!authStore.user;
   const userRole = authStore.user?.role;
+
+  if (isLoggedIn && userRole === "Mahasiswa") {
+    const currentYear = new Date().getFullYear();
+    const estYear = authStore.user?.tahun_perkiraan_lulus ? parseInt(authStore.user?.tahun_perkiraan_lulus) : null;
+
+    // Check if student is expired
+    const isStudentExpired = estYear && currentYear > estYear;
+
+    // SCENARIO A: Student IS Expired
+    if (isStudentExpired) {
+      // If they are NOT already on the account status page, force them there
+      if (to.name !== "AccountStatus") {
+        return next({ name: "AccountStatus" });
+      }
+      // If they ARE on the account status page, allow it
+      return next();
+    }
+
+    // SCENARIO B: Student IS NOT Expired but tries to access AccountStatus
+    if (!isStudentExpired && to.name === "AccountStatus") {
+      return next({ name: "HomePage" }); // Or redirect to where they came from
+    }
+  }
+
+  // 3. Prevent Non-Mahasiswa from accessing AccountStatus
+  if (to.name === "AccountStatus" && userRole !== "Mahasiswa") {
+    return next({ name: "HomePage" }); // Or 403 Page
+  }
 
   const requiredRoles = to.meta.roles;
   const publicOnly = to.meta.publicOnly;

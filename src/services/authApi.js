@@ -36,4 +36,16 @@ export default {
   resetPassword(formData) {
     return apiClient.post("/forgot-password/reset", formData);
   },
+
+  // [BARU] Request OTP Lifecycle
+  // payload: { type: 'extend_student' | 'convert_alumni', new_email?: string }
+  requestLifecycleOtp(payload) {
+    return apiClient.post("/auth/lifecycle/request-otp", payload);
+  },
+
+  // [BARU] Verify OTP Lifecycle
+  // payload: { type: '...', otp: string, new_email?: string }
+  verifyLifecycleOtp(payload) {
+    return apiClient.post("/auth/lifecycle/verify-otp", payload);
+  },
 };
