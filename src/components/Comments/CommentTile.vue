@@ -177,7 +177,7 @@ const loadMoreReplies = () => {
   <div class="flex flex-col">
     <!-- TAMPILAN UTAMA KOMENTAR -->
     <div class="flex items-start gap-3">
-      <RouterLink :to="`/profile/${comment.user.username}`">
+      <RouterLink :to="isAdminView ? '' : `/profile/${comment.user.username}`">
         <img :src="comment.user.profile_picture" alt="User" class="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover self-start mt-1" />
       </RouterLink>
 
@@ -185,7 +185,7 @@ const loadMoreReplies = () => {
         <!-- Bubble Komentar -->
         <div class="bg-gray-100 rounded-2xl px-4 py-2 inline-block min-w-[200px]">
           <div class="flex justify-between items-baseline gap-4 mb-1">
-            <RouterLink :to="`/profile/${comment.user.username}`" class="text-sm font-bold text-gray-900 hover:underline cursor-pointer">{{ comment.user.username }}</RouterLink>
+            <RouterLink :to="isAdminView ? '' : `/profile/${comment.user.username}`" class="text-sm font-bold text-gray-900 hover:underline cursor-pointer">{{ comment.user.username }}</RouterLink>
             <span class="text-xs text-gray-500">
               {{ formatTimeAgo(comment.created_at) }}
             </span>

@@ -44,10 +44,15 @@ export default {
     return apiClient.get("/admin/users", { params });
   },
 
-  updateUserRole(id, role) {
-    const form = new FormData();
-    form.append("role", role);
-    return apiClient.post(`/admin/users/${id}/role`, form);
+  // updateUserRole(id, role) {
+  //   const form = new FormData();
+  //   form.append("role", role);
+  //   return apiClient.post(`/admin/users/${id}/role`, form);
+  // },
+
+  updateUser(id, formData) {
+    // Pastikan backend support method POST dengan _method=PUT atau langsung POST untuk update multipart
+    return apiClient.post(`/admin/users/${id}/update`, formData);
   },
 
   toggleActiveUser(id) {
@@ -55,7 +60,7 @@ export default {
   },
 
   deleteUser(id) {
-    return apiClient.delete(`/admin/users/${id}`);
+    return apiClient.post(`/admin/users/${id}/delete`);
   },
 
   promoteToAlumni(payload) {

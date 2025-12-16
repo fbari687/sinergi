@@ -10,7 +10,7 @@ const loading = ref(true);
 const loadCommunities = async () => {
   loading.value = true;
   try {
-    const response = await communityApi.getCommunityJoinedByMe();
+    const response = await communityApi.getCommunityJoinedByMe({ limit: 5 });
     communities.value = response.data.data;
   } catch (error) {
     console.error("Gagal memuat komunitas:", error);

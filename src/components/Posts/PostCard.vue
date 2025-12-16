@@ -107,11 +107,11 @@ const getRoleColor = (role) => {
 <template>
   <article class="w-full bg-white border border-gray-200 rounded-xl mb-5">
     <div class="flex items-start p-4">
-      <RouterLink :to="`/profile/${post.user.username}`">
+      <RouterLink :to="isAdminView ? '' : `/profile/${post.user.username}`">
         <img :src="post.user.profile_picture" alt="Profile" class="w-12 h-12 rounded-full mr-3 object-cover" />
       </RouterLink>
       <div class="grow">
-        <RouterLink :to="`/profile/${post.user.username}`" class="flex items-center w-fit gap-1 text-base text-black font-bold m-0 border-b border-b-transparent transition duration-150 hover:border-b-black">
+        <RouterLink :to="isAdminView ? '' : `/profile/${post.user.username}`" class="flex items-center w-fit gap-1 text-base text-black font-bold m-0 border-b border-b-transparent transition duration-150 hover:border-b-black">
           <span>{{ post.user.username }}</span>
           <span v-if="post.user.id != authStore.user.id" class="items-center px-1.5 text-[10px] font-bold border shadow-sm rounded-full" :class="getRoleColor(post.user.role)">
             {{ post.user.role }}

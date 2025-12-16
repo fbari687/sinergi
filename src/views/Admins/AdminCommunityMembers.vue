@@ -93,7 +93,7 @@ onUnmounted(() => {
 
     <div v-if="admins.length > 0" class="w-full bg-white border border-gray-200 rounded-xl p-5">
       <h3 class="font-bold text-gray-900 mb-2">Admin & Moderator · {{ meta.total_admins }}</h3>
-      <CommunityMembersTile v-for="admin in admins" :key="admin.id" :member="admin" :currentUserRole="'ADMIN'" :communitySlug="community.slug" @refresh="onRefresh" />
+      <CommunityMembersTile v-for="admin in admins" :key="admin.id" :isAdminView="true" :member="admin" :currentUserRole="'ADMIN'" :communitySlug="community.slug" @refresh="onRefresh" />
     </div>
 
     <div class="w-full bg-white border border-gray-200 rounded-xl p-5">

@@ -23,7 +23,7 @@ const loadingSearch = ref(false);
 const loadMyCommunities = async () => {
   loadingJoined.value = true;
   try {
-    const response = await communityApi.getCommunityJoinedByMe();
+    const response = await communityApi.getCommunityJoinedByMe({ limit: 3 });
     communitiesJoined.value = response.data.data;
   } catch (error) {
     console.error("Gagal memuat komunitas:", error);

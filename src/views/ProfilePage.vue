@@ -327,13 +327,13 @@ watch(
             </div>
           </div>
 
-          <div class="bg-white rounded-lg shadow-sm p-6 md:p-8 border border-gray-100">
+          <!-- <div class="bg-white rounded-lg shadow-sm p-6 md:p-8 border border-gray-100">
             <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2"><i class="fas fa-chart-line text-blue-500"></i> Aktivitas</h2>
             <div class="flex flex-col items-center justify-center py-12 text-gray-400 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
               <i class="fas fa-ghost text-4xl mb-3 opacity-50"></i>
               <p>Belum ada aktivitas untuk ditampilkan.</p>
             </div>
-          </div>
+          </div> -->
         </div>
 
         <div v-else class="max-w-5xl mx-auto flex flex-col items-center justify-center py-20 text-gray-500">

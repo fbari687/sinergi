@@ -1,8 +1,10 @@
 import apiClient from "./axios";
 
 export default {
-  getCommunityJoinedByMe() {
-    return apiClient.get("/joined/communities");
+  getCommunityJoinedByMe(params = {}) {
+    return apiClient.get("/joined/communities", {
+      params,
+    });
   },
   getRecommendedCommunities() {
     return apiClient.get("/communities/recommended");

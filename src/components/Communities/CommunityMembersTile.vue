@@ -9,6 +9,7 @@ const props = defineProps({
   member: { type: Object, required: true },
   currentUserRole: { type: String, required: true }, // Role user yang login (OWNER/ADMIN/MEMBER)
   communitySlug: { type: String, required: true },
+  isAdminView: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(["refresh"]); // Event untuk minta parent refresh data
@@ -128,7 +129,7 @@ const joinDate = computed(() => {
     <div class="flex items-center gap-3">
       <img :src="member.profile_picture || `https://ui-avatars.com/api/?name=${member.fullname}&background=random`" class="w-10 h-10 rounded-full object-cover bg-gray-100" />
       <div class="flex flex-col">
-        <RouterLink :to="`/profile/${member.username}`" class="font-semibold text-gray-900 text-sm hover:underline">{{ member.fullname }}</RouterLink>
+        <RouterLink :to="isAdminView ? '' : `/profile/${member.username}`" class="font-semibold text-gray-900 text-sm hover:underline">{{ member.fullname }}</RouterLink>
         <div class="flex items-center gap-2 text-xs">
           <template v-if="member.role === 'OWNER' || member.role === 'ADMIN'">
             <span class="text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded font-medium border border-blue-100">

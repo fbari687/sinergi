@@ -172,11 +172,11 @@ onMounted(loadComments);
     <div class="flex-1 p-4 space-y-6 overflow-y-auto pb-24">
       <div>
         <div class="flex items-start">
-          <RouterLink :to="`/profile/${post.user.username}`">
+          <RouterLink :to="isAdminView ? '' : `/profile/${post.user.username}`">
             <img :src="post.user.profile_picture" alt="Profile" class="w-12 h-12 rounded-full mr-3 object-cover" />
           </RouterLink>
           <div class="grow">
-            <RouterLink :to="`/profile/${post.user.username}`" class="flex items-center w-fit gap-1 text-base text-black font-bold m-0 border-b border-b-transparent transition duration-150 hover:border-b-black">
+            <RouterLink :to="isAdminView ? '' : `/profile/${post.user.username}`" class="flex items-center w-fit gap-1 text-base text-black font-bold m-0 border-b border-b-transparent transition duration-150 hover:border-b-black">
               <span>
                 {{ post.user.username }}
               </span>

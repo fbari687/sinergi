@@ -1,12 +1,12 @@
 <script setup>
 import { Menubar, useConfirm } from "primevue";
-import { computed } from "vue"; // Ganti ref dengan computed
-import { RouterLink, useRouter, useRoute } from "vue-router"; // Tambah useRoute
+import { computed } from "vue";
+import { RouterLink, useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/store/auth";
 
 const authStore = useAuthStore();
 const router = useRouter();
-const route = useRoute(); // Hook untuk mengambil informasi URL saat ini
+const route = useRoute();
 const confirm = useConfirm();
 
 const handleLogoutConfirm = () => {
@@ -24,35 +24,48 @@ const handleLogoutConfirm = () => {
   });
 };
 
-// Ubah 'items' menjadi computed agar reaktif terhadap perubahan route
-const items = computed(() => [
-  {
-    label: authStore.user?.fullname || "User",
-    items: [
-      {
-        label: "My Profile",
-        icon: "fas fa-user-circle",
-        command: () => {
-          if (authStore.user) {
-            router.push(`/profile/${authStore.user.username}`);
-          }
-        },
+const items = computed(() => {
+  // 1. Siapkan array submenu default
+  const subMenuItems = [];
+
+  // 2. Cek Role: Jika BUKAN Admin, tambahkan menu "My Profile"
+  // Pastikan properti 'role' sesuai dengan data user di authStore (misal: user.role atau user.role_name)
+  if (authStore.user?.role !== "Admin") {
+    subMenuItems.push({
+      label: "My Profile",
+      icon: "fas fa-user-circle",
+      command: () => {
+        if (authStore.user) {
+          router.push(`/profile/${authStore.user.username}`);
+        }
       },
-      {
-        separator: true,
+    });
+  }
+
+  // 3. Tambahkan Separator dan Logout (Selalu ada untuk semua role)
+  subMenuItems.push(
+    {
+      separator: true,
+    },
+    {
+      label: "Logout",
+      icon: "fas fa-sign-out-alt",
+      command: () => {
+        if (authStore.user) {
+          handleLogoutConfirm();
+        }
       },
-      {
-        label: "Logout",
-        icon: "fas fa-sign-out-alt",
-        command: () => {
-          if (authStore.user) {
-            handleLogoutConfirm();
-          }
-        },
-      },
-    ],
-  },
-]);
+    }
+  );
+
+  // 4. Return struktur menu utama
+  return [
+    {
+      label: authStore.user?.fullname || "User",
+      items: subMenuItems,
+    },
+  ];
+});
 </script>
 
 <template>
@@ -78,20 +91,14 @@ const items = computed(() => [
 </template>
 
 <style scoped>
-/* :deep() memaksa style ini masuk ke dalam 
-   komponen Menubar
-*/
+/* :deep() memaksa style ini masuk ke dalam komponen Menubar */
 
-/* Secara default (mobile), SEMBUNYIKAN 
-   seluruh daftar menu <ul>.
-*/
+/* Secara default (mobile), SEMBUNYIKAN seluruh daftar menu <ul>. */
 :deep(.p-menubar-root-list) {
   display: none;
 }
 
-/* Pada breakpoint 'md' (768px) dan lebih besar,
-   TAMPILKAN kembali daftar menu <ul> sebagai flex.
-*/
+/* Pada breakpoint 'lg' (1024px) dan lebih besar, TAMPILKAN kembali daftar menu <ul>. */
 @media (min-width: 1024px) {
   :deep(.p-menubar-root-list) {
     display: flex;

@@ -291,7 +291,7 @@ const getRoleColor = (role) => {
       <div class="flex justify-between items-start">
         <div class="flex flex-col">
           <div class="flex items-center justify-start gap-1">
-            <RouterLink :to="`/profile/${answer.username}`" class="font-bold text-gray-800 text-sm hover:underline cursor-pointer">{{ answer.fullname }}</RouterLink>
+            <RouterLink :to="isAdminView ? '' : `/profile/${answer.username}`" class="font-bold text-gray-800 text-sm hover:underline cursor-pointer">{{ answer.fullname }}</RouterLink>
             <span v-if="answer.user_id != authStore.user.id" class="items-center px-1.5 text-[10px] font-bold border shadow-sm rounded-full cursor-default" :class="getRoleColor(answer.role_name)">{{ answer.role_name }}</span>
             <span v-else class="items-center px-1.5 text-[10px] font-bold border shadow-sm rounded-full cursor-default" :class="getRoleColor('default')"> Anda </span>
           </div>
