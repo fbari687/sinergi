@@ -33,6 +33,7 @@ import AdminForumDetail from "@/views/Admins/AdminForumDetail.vue";
 import CommunityLeaderboardPage from "@/views/CommunityLeaderboardPage.vue";
 import AdminLeaderboardPage from "@/views/Admins/AdminLeaderboardPage.vue";
 import AccountStatusPage from "@/views/AccountStatusPage.vue";
+import LeaderboardPage from "@/views/LeaderboardPage.vue";
 
 const allRoles = ["Admin", "Dosen", "Mahasiswa", "Alumni", "Mitra", "Pakar"];
 const internalRoles = ["Dosen", "Mahasiswa"];
@@ -165,6 +166,14 @@ const routes = [
     props: true, // Agar slug dan forumId masuk sebagai props
     meta: {
       roles: allRoles,
+    },
+  },
+  {
+    path: "/leaderboard",
+    name: "Leaderboard",
+    component: LeaderboardPage,
+    meta: {
+      roles: ["Dosen"],
     },
   },
   {

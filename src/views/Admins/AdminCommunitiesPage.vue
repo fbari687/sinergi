@@ -143,7 +143,7 @@ onMounted(() => {
         </div>
 
         <div class="w-full md:w-56">
-          <Dropdown v-model="sortOption" :options="sortOptions" optionLabel="label" optionValue="value" placeholder="Urutkan" class="w-full !rounded-xl !border-gray-300" />
+          <Dropdown v-model="sortOption" :options="sortOptions" optionLabel="label" optionValue="value" placeholder="Urutkan" class="w-full rounded-xl! border-gray-300!" />
         </div>
       </div>
 
@@ -192,7 +192,7 @@ onMounted(() => {
               </div>
             </div>
 
-            <Paginator :rows="perPage" :totalRecords="totalRecords" :first="(page - 1) * perPage" @page="onPageChange" template="PrevPageLink PageLinks NextPageLink" class="!bg-transparent !border-none" />
+            <Paginator :rows="perPage" :totalRecords="totalRecords" :first="(page - 1) * perPage" @page="onPageChange" template="PrevPageLink PageLinks NextPageLink" class="bg-transparent! border-none!" />
           </div>
         </template>
       </div>

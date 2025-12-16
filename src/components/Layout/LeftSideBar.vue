@@ -23,6 +23,10 @@ const isInternal = computed(() => {
   return authStore.user.role === "Admin" || authStore.user.role === "Mahasiswa" || authStore.user.role === "Dosen";
 });
 
+const isDosen = computed(() => {
+  return authStore.user.role === "Dosen";
+});
+
 const unreadNotificationCount = computed(() => authStore.user?.unread_notifications_count || 0);
 </script>
 
@@ -58,6 +62,7 @@ const unreadNotificationCount = computed(() => authStore.user?.unread_notificati
             <li>
               <MenuLinkTile v-if="isInternal" to="/home" icon="fa-solid fa-home" label="Beranda" />
               <MenuLinkTile to="/notifications" icon="fa-solid fa-bell" label="Notifikasi" is-notification="true" :count-notification="unreadNotificationCount" />
+              <MenuLinkTile v-if="isDosen" to="/leaderboard" icon="fa-solid fa-medal" label="Papan Skor" />
               <MenuLinkTile :to="isInternal ? '/communities' : '/communities/joined'" icon="fa-solid fa-users" label="Komunitas" />
             </li>
           </ul>
@@ -68,6 +73,7 @@ const unreadNotificationCount = computed(() => authStore.user?.unread_notificati
   </aside>
   <nav class="fixed w-full h-14 z-10 bottom-0 py-2 px-4 lg:hidden flex items-center justify-between bg-white">
     <MenuLinkTile v-if="isInternal" to="/home" icon="fa-solid fa-home text-sm" />
+    <MenuLinkTile v-if="isDosen" to="/leaderboard" icon="fa-solid fa-medal" />
     <MenuLinkTile to="/notifications" icon="fa-solid fa-bell" />
     <MenuLinkTile :to="isInternal ? '/communities' : '/communities/joined'" icon="fa-solid fa-users" />
     <MenuLinkTile :to="`/profile/${authStore.user.username}`" :image="authStore.user.profile_picture" />
