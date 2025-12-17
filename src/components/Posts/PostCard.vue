@@ -118,6 +118,10 @@ const getRoleColor = (role) => {
           </span>
           <span v-else class="items-center px-1.5 text-[10px] font-bold border shadow-sm rounded-full" :class="getRoleColor('default')"> Anda </span>
         </RouterLink>
+        <div v-if="post.is_pinned" class="w-fit flex items-center gap-1 text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full text-[10px] font-bold border border-blue-200">
+          <i class="fas fa-thumbtack -rotate-45 text-[9px]"></i>
+          <span>DISEMATKAN</span>
+        </div>
         <p class="text-xs text-gray-500 mt-1 m-0">{{ post.is_edited ? formatIndonesianDate(post.created_at) + ` (Telah disunting ${formatTimeAgo(post.updated_at)})` : formatTimeAgo(post.created_at) }}</p>
       </div>
 

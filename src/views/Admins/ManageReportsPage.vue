@@ -13,6 +13,7 @@ import PostReadOnlyContent from "@/components/Posts/PostReadOnlyContent.vue";
 // --- IMPORT BARU: FORUM ---
 import forumApi from "@/services/forumApi"; // Pastikan service ini ada
 import ForumReadOnlyContent from "@/components/Forums/ForumReadOnlyContent.vue";
+import { RouterLink } from "vue-router";
 
 const toast = useToast();
 
@@ -351,7 +352,7 @@ const deleteContent = async () => {
                 </td>
                 <td class="px-6 py-4 text-center">
                   <button
-                    class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 hover:text-blue-800 rounded-lg transition-all shadow-sm border border-blue-100"
+                    class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 hover:text-blue-800 rounded-lg transition-all shadow-sm border border-blue-100 cursor-pointer"
                     @click="openDetail(item)"
                   >
                     <i class="fas fa-eye"></i> Tinjau
@@ -425,12 +426,18 @@ const deleteContent = async () => {
                   </button>
                 </div>
 
-                <div v-if="detailTarget.type_label === 'FORUM' || selectedSummary?.reportable_type === 'FORUM'" class="mt-3">
+                <div v-if="detailTarget.type_label === 'Forum Diskusi' || selectedSummary?.reportable_type === 'FORUM'" class="mt-3">
                   <button @click="openFullForumContent" :disabled="isFetchingForum" class="text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50 disabled:cursor-wait">
                     <i v-if="isFetchingForum" class="fa-solid fa-circle-notch fa-spin"></i>
                     <i v-else class="fa-solid fa-external-link-alt"></i>
                     <span>{{ isFetchingForum ? "Memuat Forum..." : "Lihat Forum Lengkap" }}</span>
                   </button>
+                </div>
+                <div v-if="detailTarget.type_label === 'Komunitas' || selectedSummary?.reportable_type === 'COMMUNITY'" class="mt-3">
+                  <RouterLink :to="`/admin/communities/${detailTarget?.slug}`" class="text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 cursor-pointer disabled:opacity-50 disabled:cursor-wait">
+                    <i class="fa-solid fa-external-link-alt"></i>
+                    <span>Lihat Komunitas</span>
+                  </RouterLink>
                 </div>
               </div>
             </div>
@@ -481,21 +488,21 @@ const deleteContent = async () => {
                 <button
                   @click="applyStatus('IGNORED')"
                   :disabled="isActionLoading || selectedSummary?.status === 'IGNORED'"
-                  class="px-4 py-2 text-xs rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-bold flex items-center justify-center bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 shadow-sm"
+                  class="px-4 py-2 text-xs rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-bold flex items-center justify-center bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 shadow-sm cursor-pointer"
                 >
                   Abaikan
                 </button>
                 <button
                   @click="applyStatus('IN_REVIEW')"
                   :disabled="isActionLoading || selectedSummary?.status === 'IN_REVIEW'"
-                  class="px-4 py-2 text-xs rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-bold flex items-center justify-center bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border border-yellow-200"
+                  class="px-4 py-2 text-xs rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-bold flex items-center justify-center bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border border-yellow-200 cursor-pointer"
                 >
                   Tinjau
                 </button>
                 <button
                   @click="applyStatus('RESOLVED')"
                   :disabled="isActionLoading || selectedSummary?.status === 'RESOLVED'"
-                  class="px-4 py-2 text-xs rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-bold flex items-center justify-center bg-green-50 text-green-700 hover:bg-green-100 border border-green-200"
+                  class="px-4 py-2 text-xs rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-bold flex items-center justify-center bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 cursor-pointer"
                 >
                   Selesai
                 </button>
@@ -503,7 +510,7 @@ const deleteContent = async () => {
                 <button
                   @click="deleteContent"
                   :disabled="isActionLoading"
-                  class="px-4 py-2 text-xs rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-bold flex items-center justify-center bg-red-600 text-white hover:bg-red-700 shadow-md hover:shadow-lg border border-transparent"
+                  class="px-4 py-2 text-xs rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-bold flex items-center justify-center bg-red-600 text-white hover:bg-red-700 shadow-md hover:shadow-lg border border-transparent cursor-pointer"
                 >
                   <i v-if="isActionLoading" class="fa-solid fa-spinner fa-spin mr-1"></i> Hapus Konten
                 </button>

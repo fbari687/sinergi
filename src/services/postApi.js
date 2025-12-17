@@ -36,6 +36,9 @@ export default {
       },
     });
   },
+  togglePostPin(postId) {
+    return apiClient.post(`/posts/${postId}/pin`);
+  },
   deletePost(postId) {
     return apiClient.post(`/posts/${postId}/delete`);
   },

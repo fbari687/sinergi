@@ -4,6 +4,7 @@ import { Button, Popover, useConfirm, useToast } from "primevue";
 import { ref } from "vue";
 import EditPost from "@/components/Posts/EditPost.vue";
 import { useReportModal } from "@/utils/useReportModal";
+import postApi from "@/services/postApi";
 
 const { openReport } = useReportModal();
 
@@ -25,9 +26,35 @@ const opPopover = ref(null);
 const confirm = useConfirm();
 const toast = useToast();
 const showEditDialog = ref(false);
+const pinLoading = ref(false);
 
 const togglePopover = (event) => {
   opPopover.value.toggle(event);
+};
+
+const handleTogglePin = async () => {
+  pinLoading.value = true;
+  try {
+    const res = await postApi.togglePostPin(props.post.id);
+    toast.add({
+      severity: "success",
+      summary: "Berhasil",
+      detail: res.data.meta.message,
+      life: 3000,
+    });
+
+    emit("postUpdated"); // Refresh data agar posisi postingan pindah ke atas
+    if (opPopover.value) opPopover.value.hide();
+  } catch (err) {
+    toast.add({
+      severity: "error",
+      summary: "Gagal",
+      detail: err.response?.data?.meta?.message || "Gagal mengubah status sematan",
+      life: 3000,
+    });
+  } finally {
+    pinLoading.value = false;
+  }
 };
 
 const handleEditClick = () => {
@@ -68,6 +95,15 @@ const confirmDelete = () => {
       <i class="fas fa-ellipsis-h"></i>
     </Button>
     <Popover ref="opPopover" class="bg-transparent border-none shadow-none p-0 z-30">
+      <template v-if="authStore.user?.role === 'Admin'">
+        <button type="button" @click="handleTogglePin" :disabled="pinLoading" class="w-full cursor-pointer flex items-center gap-3 px-4 py-3 text-sm text-gray-800 hover:bg-gray-100 border-b border-gray-50">
+          <i class="fas fa-thumbtack w-5 text-center" :class="post.is_pinned ? 'text-blue-500' : 'text-gray-500'"></i>
+          <span :class="{ 'font-bold text-blue-600': post.is_pinned }">
+            {{ post.is_pinned ? "Lepas Sematan" : "Sematkan Postingan" }}
+          </span>
+        </button>
+      </template>
+
       <template v-if="post.user.id == authStore.user.id">
         <button type="button" @click="handleEditClick" class="w-full cursor-pointer flex items-center gap-3 px-4 py-3 text-sm text-gray-800 hover:bg-gray-100"><i class="fas fa-edit w-5 text-center text-gray-500"></i> Edit</button>
         <button type="button" @click="confirmDelete()" class="w-full cursor-pointer flex items-center gap-3 px-4 py-3 text-sm text-gray-800 hover:bg-gray-100"><i class="fas fa-trash w-5 text-center text-gray-500"></i> Delete</button>

@@ -80,6 +80,10 @@ const handlePostCreated = () => {
   loadPosts(true);
 };
 
+const handlePostUpdated = () => {
+  loadPosts(true);
+};
+
 // Handler Update Jumlah Komentar (jika admin menghapus komentar di dalam dialog)
 const handleChangeCommentCount = (postId, count) => {
   const post = posts.value.find((p) => p.id === postId);
@@ -157,7 +161,7 @@ onUnmounted(() => {
           </template>
 
           <template v-else>
-            <PostCard v-for="post in posts" :key="post.id" :post="post" :isAdminView="true" @deletePost="handleDeletePost" @changeCommentCount="handleChangeCommentCount" />
+            <PostCard v-for="post in posts" :key="post.id" :post="post" :isAdminView="true" @deletePost="handleDeletePost" @refreshCommunity="handlePostCreated" @changeCommentCount="handleChangeCommentCount" />
 
             <div ref="loadTrigger" class="h-16 flex items-center justify-center w-full mt-4">
               <i v-if="loadingNextPage" class="fa-solid fa-circle-notch fa-spin text-blue-500 text-xl"></i>
