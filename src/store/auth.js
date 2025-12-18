@@ -2,10 +2,12 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import authApi from "@/services/authApi";
 import router from "@/router";
+import { useToast } from "primevue";
 
 export const useAuthStore = defineStore("auth", () => {
   // --- STATE ---
   const user = ref(null);
+  const toast = useToast();
   const pollingInterval = ref(null); // Variabel untuk menyimpan ID interval
 
   // --- ACTIONS ---
@@ -30,6 +32,12 @@ export const useAuthStore = defineStore("auth", () => {
       // Pastikan backend /me sudah mengembalikan 'unread_notifications_count'
       const response = await authApi.getMe();
       const newData = response.data.data;
+
+      if (newData.is_active === false || String(newData.is_active) === "0") {
+        toast.add({ severity: "error", summary: "Error", detail: "Akun dinonaktifkan. Mengeluarkan pengguna..." });
+        await handleLogout();
+        return;
+      }
 
       // Update hanya field count notifikasi agar reaktif
       if (user.value && newData.unread_notifications_count !== undefined) {
@@ -106,6 +114,12 @@ export const useAuthStore = defineStore("auth", () => {
       const response = await authApi.getMe();
       setUser(response.data.data);
 
+      if (response.data.data.is_active === false) {
+        toast.add({ severity: "error", summary: "Error", detail: "Akun dinonaktifkan. Mengeluarkan pengguna..." });
+        await handleLogout();
+        return;
+      }
+
       // Jika berhasil auth, JALANKAN polling
       startNotificationPolling();
     } catch (error) {
@@ -147,7 +161,7 @@ export const useAuthStore = defineStore("auth", () => {
       // Logout sukses, MATIKAN polling
       stopNotificationPolling();
 
-      router.push("/");
+      router.replace("/");
     }
   }
 

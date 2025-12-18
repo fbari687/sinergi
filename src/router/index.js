@@ -302,6 +302,10 @@ router.beforeEach(async (to, from, next) => {
   const isLoggedIn = !!authStore.user;
   const userRole = authStore.user?.role;
 
+  if (to.meta.roles && !isLoggedIn) {
+    return next({ name: "LoginPage" });
+  }
+
   if (isLoggedIn && userRole === "Mahasiswa") {
     const currentYear = new Date().getFullYear();
     const estYear = authStore.user?.tahun_perkiraan_lulus ? parseInt(authStore.user?.tahun_perkiraan_lulus) : null;
