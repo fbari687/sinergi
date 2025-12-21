@@ -14,7 +14,7 @@ const confirm = useConfirm();
 const users = ref([]);
 const loading = ref(false);
 const page = ref(1);
-const perPage = ref(10);
+const perPage = ref(2);
 const total = ref(0);
 const searchQ = ref("");
 let searchTimeout = null;
@@ -429,7 +429,7 @@ const getRoleColor = (role) => {
             <input
               v-model="searchQ"
               type="text"
-              placeholder="Cari nama, email, username..."
+              placeholder="Cari nama, username..."
               class="block w-full p-2.5 ps-10 text-sm text-gray-900 border border-gray-200 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
             />
           </div>
@@ -451,7 +451,7 @@ const getRoleColor = (role) => {
           <table v-else class="w-full text-sm text-left text-gray-500">
             <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-200">
               <tr>
-                <th class="p-4 w-4"><input type="checkbox" class="w-4 h-4 rounded cursor-pointer" v-model="selectAll" @change="toggleSelectAllOnPage" /></th>
+                <!-- <th class="p-4 w-4"><input type="checkbox" class="w-4 h-4 rounded cursor-pointer" v-model="selectAll" @change="toggleSelectAllOnPage" /></th> -->
                 <th class="px-6 py-4 font-bold">Identitas User</th>
                 <th class="px-6 py-4 font-bold">Role</th>
                 <th class="px-6 py-4 font-bold">Ringkasan Profil</th>
@@ -461,7 +461,7 @@ const getRoleColor = (role) => {
             </thead>
             <tbody class="divide-y divide-gray-100">
               <tr v-for="u in users" :key="u.id" class="bg-white hover:bg-blue-50/30 transition-colors group">
-                <td class="w-4 p-4"><input type="checkbox" :checked="selectedIds.has(u.id)" @change="toggleSelect(u.id)" class="w-4 h-4 cursor-pointer" /></td>
+                <!-- <td class="w-4 p-4"><input type="checkbox" :checked="selectedIds.has(u.id)" @change="toggleSelect(u.id)" class="w-4 h-4 cursor-pointer" /></td> -->
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-4">
                     <img :src="u.profile_picture || `https://ui-avatars.com/api/?name=${u.fullname}&background=random`" class="w-10 h-10 rounded-full object-cover border border-gray-200" />
